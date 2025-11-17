@@ -1,0 +1,550 @@
+id_ubicacion,cve_ent,entidad,cve_mun,municipio,cve_loc,localidad
+1,2,Baja California,2,Mexicali,192,Ejido Hermosillo                                                                                              
+2,2,Baja California,1,Ensenada,1,Ensenada                                                                                                      
+3,2,Baja California,2,Mexicali,1581,Los Ángulos (Colonia Venustiano Carranza)                                                                     
+4,2,Baja California,1,Ensenada,186,Ejido Punta Colnett (Punta Colonet)                                                                           
+5,2,Baja California,2,Mexicali,2900,Familia Lamarque (Colonia Chapultepec)                                                                        
+6,2,Baja California,2,Mexicali,268,Ejido Hechicera                                                                                               
+7,2,Baja California,2,Mexicali,1,Mexicali                                                                                                      
+8,2,Baja California,6,San Quintín,40,Camalú                                                                                                        
+9,2,Baja California,1,Ensenada,139,Rodolfo Sánchez Taboada (Maneadero)                                                                           
+10,2,Baja California,6,San Quintín,117,Ejido Mesa de San Jacinto                                                                                     
+11,2,Baja California,1,Ensenada,184,Coronel Esteban Cantú                                                                                         
+12,2,Baja California,1,Ensenada,247,El Sauzal de Rodríguez                                                                                        
+13,2,Baja California,6,San Quintín,1,San Quintín                                                                                                   
+14,2,Baja California,1,Ensenada,243,San Vicente                                                                                                   
+15,2,Baja California,4,Tijuana,1,Tijuana                                                                                                       
+16,2,Baja California,7,San Felipe                                                                  ,1,San Felipe                                                                                                    
+17,2,Baja California,3,Tecate,2033,Cooperativa Jamec                                                                                             
+18,2,Baja California,2,Mexicali,141,Ejido Tamaulipas (Estación Cucapah)                                                                           
+19,2,Baja California,2,Mexicali,237,Nuevo León                                                                                                    
+20,2,Baja California,1,Ensenada,1231,La Calavera                                                                                                   
+21,2,Baja California,3,Tecate,1,Tecate                                                                                                        
+22,2,Baja California,6,San Quintín,837,Santa Rosaliíta                                                                                               
+23,2,Baja California,1,Ensenada,95,Ejido Eréndira                                                                                                
+24,2,Baja California,1,Ensenada,2580,Los Gringos                                                                                                   
+25,2,Baja California,6,San Quintín,700,Rancho Chaidez                                                                                                
+26,2,Baja California,7,San Felipe                                                                  ,48,Cinco Islas [Campo]                                                                                           
+27,2,Baja California,5,Playas de Rosarito,305,Puerto Popotla                                                                                                
+28,2,Baja California,6,San Quintín,115,Ejido José María Morelos y Pavón                                                                              
+29,2,Baja California,6,San Quintín,118,Ejido Nueva Odisea (El Pabellón)                                                                              
+30,2,Baja California,2,Mexicali,231,Ciudad Morelos (Cuervos)                                                                                      
+31,2,Baja California,6,San Quintín,585,Lázaro Cárdenas                                                                                               
+32,2,Baja California,1,Ensenada,3950,Rancho González                                                                                               
+33,2,Baja California,1,Ensenada,190,Real del Castillo Nuevo (Ojos Negros)                                                                         
+34,2,Baja California,6,San Quintín,77,Cielito Lindo                                                                                                 
+35,2,Baja California,2,Mexicali,461,Ciudad Coahuila (Kilómetro Cincuenta y Siete)                                                                 
+36,2,Baja California,1,Ensenada,1962,Villarino (Campo Villarino) [Campamento Turístico]                                                            
+37,2,Baja California,6,San Quintín,150,El Chamizal [Rancho]                                                                                          
+38,2,Baja California,6,San Quintín,22,Bahía de los Ángeles                                                                                          
+39,2,Baja California,5,Playas de Rosarito,90,Puerto Nuevo                                                                                                  
+40,2,Baja California,1,Ensenada,3172,Arnáiz                                                                                                        
+41,2,Baja California,1,Ensenada,3122,Ejido 27 de Enero                                                                                             
+42,2,Baja California,1,Ensenada,124,Isla de Cedros                                                                                                
+43,2,Baja California,6,San Quintín,861,Venustiano Carranza (Santa María)                                                                             
+44,2,Baja California,6,San Quintín,121,Ejido Papalote                                                                                                
+45,2,Baja California,6,San Quintín,126,Ejido Valle Tranquilo                                                                                         
+46,2,Baja California,6,San Quintín,732,Rancho Orendain                                                                                               
+47,2,Baja California,7,San Felipe                                                                  ,188,Octavios [Campo]                                                                                              
+48,2,Baja California,7,San Felipe                                                                  ,225,Punta Final (Villa Mar y Sol)                                                                                 
+49,2,Baja California,6,San Quintín,863,Vicente Guerrero                                                                                              
+50,2,Baja California,6,San Quintín,85,Colonia Nueva Era                                                                                             
+51,2,Baja California,6,San Quintín,124,Ejido Rubén Jaramillo                                                                                         
+52,2,Baja California,6,San Quintín,127,Ejido Villa Jesús María                                                                                       
+53,2,Baja California,2,Mexicali,185,Ciudad Guadalupe Victoria (Kilómetro Cuarenta y Tres)                                                         
+54,2,Baja California,6,San Quintín,683,Punta Prieta                                                                                                  
+55,2,Baja California,6,San Quintín,225,El Rosario de Arriba                                                                                          
+56,2,Baja California,2,Mexicali,1195,Ejido Doctor Alberto Oviedo Mota (El Indiviso)                                                                
+57,2,Baja California,2,Mexicali,402,Puente Quemado (Colonia Venustiano Carranza)                                                                  
+58,2,Baja California,2,Mexicali,411,Campo Mozqueda (Colonia Terrenos Indios)                                                                      
+59,2,Baja California,5,Playas de Rosarito,6,Buenavista                                                                                                    
+60,2,Baja California,1,Ensenada,1050,Las Olas                                                                                                      
+61,2,Baja California,6,San Quintín,82,Colonia Lomas de San Ramón (Triquis)                                                                          
+62,2,Baja California,6,San Quintín,630,Nuevo Uruapan                                                                                                 
+63,2,Baja California,1,Ensenada,2465,El Rosario                                                                                                    
+64,2,Baja California,1,Ensenada,4444,El Morro                                                                                                      
+65,2,Baja California,3,Tecate,209,Rancho Concordia                                                                                              
+66,2,Baja California,2,Mexicali,210,Colonia Ladrillera                                                                                            
+67,2,Baja California,2,Mexicali,4839,Lázaro Cárdenas [Ejido Colectivo]                                                                             
+68,2,Baja California,2,Mexicali,7217,Jefe Rex Jara [Trituradora]
+69,2,Baja California,2,Mexicali,505,Salina Ometepec (NCPE Industrial Año de Juárez 1972)                                                          
+70,2,Baja California,2,Mexicali,333,Ejido el Choropo (Colonia Colorado Número Uno)                                                                
+71,2,Baja California,2,Mexicali,1388,Las Margaritas (Colonia Colorado Tres)                                                                        
+72,2,Baja California,3,Tecate,107,La Rumorosa                                                                                                   
+73,2,Baja California,2,Mexicali,2887,Calizas [Industrias]                                                                                          
+74,2,Baja California,7,San Felipe                                                                  ,175,Mineral Real de Ángeles                                                                                       
+75,2,Baja California,4,Tijuana,1359,Guerra [Taller]                                                                                               
+76,2,Baja California,6,San Quintín,841,Sara [Mina]                                                                                                   
+77,2,Baja California,4,Tijuana,2102,La Hermosa                                                                                                    
+78,2,Baja California,4,Tijuana,1060,Valle Bonito                                                                                                  
+79,2,Baja California,7,San Felipe                                                                  ,60,Crucero Valle de la Trinidad (El Oasis)                                                                       
+80,2,Baja California,2,Mexicali,1677,Nejimex (Ganadera)                                                                                            
+81,2,Baja California,6,San Quintín,224,El Rosario de Abajo                                                                                           
+82,2,Baja California,6,San Quintín,81,Colonia Llamas                                                                                                
+83,2,Baja California,5,Playas de Rosarito,1,Playas de Rosarito                                                                                            
+84,2,Baja California,2,Mexicali,159,Delta (Estación Delta)                                                                                        
+85,2,Baja California,2,Mexicali,2473,Familia Núñez (Colonia Progreso)                                                                              
+86,2,Baja California,1,Ensenada,114,Francisco Zarco (Valle de Guadalupe)                                                                          
+87,2,Baja California,4,Tijuana,1875,La Joya                                                                                                       
+88,2,Baja California,4,Tijuana,1883,Villa del Campo                                                                                               
+89,2,Baja California,4,Tijuana,606,San Antonio del Mar                                                                                           
+90,2,Baja California,2,Mexicali,2507,Familia Pantoja (Colonia Centinela)                                                                           
+91,2,Baja California,2,Mexicali,456,Benito Juárez (Ejido Tecolotes)                                                                               
+92,2,Baja California,2,Mexicali,225,Michoacán de Ocampo                                                                                           
+93,2,Baja California,3,Tecate,340,Nueva Colonia Hindú                                                                                           
+94,2,Baja California,2,Mexicali,3616,Martín Ortíz                                                                                                  
+95,2,Baja California,2,Mexicali,2836,Familia Mendoza (Colonia Progreso)                                                                            
+96,2,Baja California,3,Tecate,1969,Casa para Pobres Desamparados                                                                                 
+97,2,Baja California,1,Ensenada,5122,Lindavista                                                                                                    
+98,2,Baja California,2,Mexicali,459,Poblado Paredones                                                                                             
+99,2,Baja California,2,Mexicali,111,Vicente Guerrero (Algodones)                                                                                  
+100,2,Baja California,2,Mexicali,206,Ejido Jiquilpan                                                                                               
+101,2,Baja California,2,Mexicali,362,Ejido el Marítimo                                                                                             
+102,2,Baja California,2,Mexicali,514,Ejido Tula                                                                                                    
+103,2,Baja California,2,Mexicali,358,Poblado Alfredo V. Bonfil                                                                                     
+104,2,Baja California,2,Mexicali,4852,Familia Sánchez                                                                                               
+105,2,Baja California,2,Mexicali,266,Colonia la Puerta                                                                                             
+106,2,Baja California,2,Mexicali,3602,Las Palmas [Rancho]                                                                                           
+107,2,Baja California,2,Mexicali,3660,Rivas [Rancho]
+108,2,Baja California,2,Mexicali,510,Ejido Hipólito Rentería                                                                                       
+109,2,Baja California,2,Mexicali,1239,Emiliano Zapata (Colonia Progreso)                                                                            
+110,2,Baja California,2,Mexicali,1564,Compuerta la 24 (Colonia Silva)                                                                               
+111,2,Baja California,4,Tijuana,575,El Mezquitito                                                                                                 
+112,2,Baja California,2,Mexicali,2893,Kilómetro Siete Punto Cinco (Colonia Colorado Uno)                                                            
+113,2,Baja California,2,Mexicali,176,El Faro                                                                                                       
+114,2,Baja California,7,San Felipe                                                                  ,69,Ejido Plan Nacional Agrario                                                                                   
+115,2,Baja California,7,San Felipe                                                                  ,202,Playa de Oro                                                                                                  
+116,2,Baja California,4,Tijuana,1919,San Marino                                                                                                    
+117,2,Baja California,2,Mexicali,195,Ejido Miguel Hidalgo                                                                                          
+118,2,Baja California,4,Tijuana,1351,San Antonio                                                                                                   
+119,2,Baja California,3,Tecate,89,Paso del Águila                                                                                               
+120,2,Baja California,2,Mexicali,2329,Familia Madrigal (Ejido Morelia)                                                                              
+121,2,Baja California,4,Tijuana,1813,Hacienda del Mar                                                                                              
+122,2,Baja California,4,Tijuana,1254,La Puerta de Alcalá                                                                                           
+123,2,Baja California,6,San Quintín,823,Santa Fe                                                                                                      
+124,2,Baja California,2,Mexicali,3108,El Caracol (Andrade Ejido Nuevo León)                                                                         
+125,2,Baja California,5,Playas de Rosarito,25,Santa Anita                                                                                                   
+126,2,Baja California,2,Mexicali,103,Ejido Licenciado Adolfo López Mateos                                                                          
+127,2,Baja California,1,Ensenada,935,Lázaro Cárdenas (Valle de la Trinidad)                                                                        
+128,2,Baja California,5,Playas de Rosarito,89,Primo Tapia                                                                                                   
+129,2,Baja California,1,Ensenada,4488,Adobe Guadalupe                                                                                               
+130,2,Baja California,1,Ensenada,657,Rancho Viejo                                                                                                  
+131,2,Baja California,4,Tijuana,1421,Parajes del Valle                                                                                             
+132,2,Baja California,5,Playas de Rosarito,230,Vista Marina                                                                                                  
+133,2,Baja California,5,Playas de Rosarito,218,Los Volcanes                                                                                                  
+134,2,Baja California,3,Tecate,26,Cañada Verde                                                                                                  
+135,2,Baja California,3,Tecate,1824,Tecate Gateway                                                                                                
+136,2,Baja California,6,San Quintín,248,Emiliano Zapata                                                                                               
+137,2,Baja California,3,Tecate,155,Luis Echeverría Álvarez (El Hongo)                                                                            
+138,2,Baja California,5,Playas de Rosarito,104,Don Pancho (Villa Pacífico)                                                                                   
+139,2,Baja California,6,San Quintín,832,Santa María (Los Pinos)                                                                                       
+140,2,Baja California,1,Ensenada,2539,Lucio Blanco [Granjas Agrícolas]                                                                              
+141,2,Baja California,6,San Quintín,628,Nuevo Centro de Población Padre Kino                                                                          
+142,2,Baja California,3,Tecate,139,Valle de las Palmas                                                                                           
+143,2,Baja California,3,Tecate,1636,El Coyote                                                                                                     
+144,2,Baja California,5,Playas de Rosarito,64,Ladrillera Pescador                                                                                           
+145,2,Baja California,6,San Quintín,111,Ejido Francisco Villa (San Simón)                                                                             
+146,2,Baja California,2,Mexicali,110,Colonia Venustiano Carranza (La Carranza)                                                                     
+147,2,Baja California,3,Tecate,1603,Hacienda Tecate                                                                                               
+148,2,Baja California,1,Ensenada,2183,Rancho Cañón Buena Vista (El Zorrillo)                                                                        
+149,2,Baja California,5,Playas de Rosarito,193,Terrazas del Pacífico                                                                                         
+150,2,Baja California,6,San Quintín,125,Ejido San Simón de Arriba                                                                                     
+151,2,Baja California,2,Mexicali,5374,Familia Flores                                                                                                
+152,2,Baja California,5,Playas de Rosarito,242,Mar de Calafia                                                                                                
+153,2,Baja California,2,Mexicali,5663,Yuma Water                                                                                                    
+154,2,Baja California,1,Ensenada,332,Los Alazanes                                                                                                  
+155,2,Baja California,2,Mexicali,4995,Valle del Puebla [Parque Industrial]                                                                          
+156,2,Baja California,6,San Quintín,529,Las Sirenas                                                                                                   
+157,2,Baja California,1,Ensenada,151,La Misión                                                                                                     
+158,2,Baja California,4,Tijuana,1961,Ley del Servicio Civil                                                                                        
+159,2,Baja California,1,Ensenada,329,La Bufadora                                                                                                   
+160,2,Baja California,4,Tijuana,1934,Lomas de San Pedro                                                                                            
+161,2,Baja California,1,Ensenada,4763,Palillo                                                                                                       
+162,2,Baja California,3,Tecate,17,El Bajío                                                                                                      
+163,2,Baja California,2,Mexicali,4774,Buen Rostro                                                                                                   
+164,2,Baja California,2,Mexicali,3570,El Encanto                                                                                                    
+165,2,Baja California,1,Ensenada,3735,Parcela Número Sesenta (Ejido Nacionalista)                                                                   
+166,2,Baja California,5,Playas de Rosarito,246,Las Flores                                                                                                    
+167,2,Baja California,1,Ensenada,5285,Tierra Santa                                                                                                  
+168,2,Baja California,2,Mexicali,2408,Familia Meza (Colonia Sonora)                                                                                 
+169,2,Baja California,2,Mexicali,227,Ejido Sinaloa (Estación Kasey)                                                                                
+170,2,Baja California,1,Ensenada,2490,El Parral                                                                                                     
+171,2,Baja California,1,Ensenada,3946,Viñedos el Tigre                                                                                              
+172,2,Baja California,1,Ensenada,2456,LA Cetto [Compañía Vinícola]                                                                                  
+173,2,Baja California,1,Ensenada,271,Villa de Juárez (San Antonio de las Minas)                                                                    
+174,2,Baja California,2,Mexicali,1798,Familia Barragán (Colonia Colorado Número Tres)                                                               
+175,2,Baja California,4,Tijuana,1402,Rancho Cota                                                                                                   
+176,2,Baja California,5,Playas de Rosarito,320,Centinela [Fraccionamiento]                                                                                   
+177,2,Baja California,2,Mexicali,2952,Familia Figueroa                                                                                              
+178,2,Baja California,2,Mexicali,3219,Rancho Viejo (Progreso Cuarta Sección)                                                                        
+179,2,Baja California,4,Tijuana,2017,Thomas Alva Edison [Parque Industrial]                                                                        
+180,2,Baja California,2,Mexicali,4796,Colonia Progreso Segunda Sección                                                                              
+181,2,Baja California,2,Mexicali,2358,Familia Martínez (Ejido Hermosillo)                                                                           
+182,2,Baja California,5,Playas de Rosarito,61,Kilómetro Cuarenta y Uno y Medio                                                                              
+183,2,Baja California,5,Playas de Rosarito,363,Villas de Casa Blanca                                                                                         
+184,2,Baja California,5,Playas de Rosarito,35,Gaviotas [Curios]                                                                                             
+185,2,Baja California,2,Mexicali,4992,Nicoya [Parque Industrial]                                                                                    
+186,2,Baja California,5,Playas de Rosarito,375,Artesanías Popotla                                                                                            
+187,2,Baja California,2,Mexicali,129,Colonia Castro                                                                                                
+188,2,Baja California,2,Mexicali,1477,Familia León (Colonia Colorado Número Tres)                                                                   
+189,2,Baja California,2,Mexicali,2653,Familia Rubio García (Colonia Colorado Número Siete)                                                          
+190,2,Baja California,5,Playas de Rosarito,194,Venustiano Carranza                                                                                           
+191,2,Baja California,3,Tecate,1927,Familia Johnston (El Gran Conejo) [Rancho]                                                                    
+192,2,Baja California,4,Tijuana,1110,Las Rosas                                                                                                     
+193,2,Baja California,5,Playas de Rosarito,376,Artesanías Popotla Dos                                                                                        
+194,2,Baja California,2,Mexicali,342,El Chorizo (Colonia Colorado 1 Campo León Uno)                                                                
+195,2,Baja California,4,Tijuana,2113,Materiales Económicos del Campo                                                                               
+196,2,Baja California,5,Playas de Rosarito,249,El Refugio                                                                                                    
+197,2,Baja California,7,San Felipe                                                                  ,234,RV Park el Cachanilla                                                                                         
+198,2,Baja California,4,Tijuana,262,Las Margaritas                                                                                                
+199,2,Baja California,2,Mexicali,1542,Crucero del Toluca (Ejido Toluca)                                                                             
+200,2,Baja California,5,Playas de Rosarito,384,Los Arroyos                                                                                                   
+201,2,Baja California,5,Playas de Rosarito,241,Lomas del Morro                                                                                               
+202,2,Baja California,3,Tecate,1834,El Nevado                                                                                                     
+203,2,Baja California,3,Tecate,1451,La Granjita                                                                                                   
+204,2,Baja California,3,Tecate,784,San José                                                                                                      
+205,2,Baja California,2,Mexicali,4997,Compañía Siderúrgica de California                                                                            
+206,2,Baja California,3,Tecate,884,La Paleta [Establo]                                                                                           
+207,2,Baja California,6,San Quintín,116,Ejido Lic. Luis Echeverría Álvarez (Chula Vista)                                                              
+208,2,Baja California,3,Tecate,1368,Los Federicos                                                                                                 
+209,2,Baja California,4,Tijuana,1954,Miguel Alemán                                                                                                 
+210,2,Baja California,4,Tijuana,1668,El Jojobal                                                                                                    
+211,2,Baja California,4,Tijuana,1977,Valle de las Palmas [Etapa 1]                                                                                 
+212,2,Baja California,4,Tijuana,1448,La Esperanza                                                                                                  
+213,2,Baja California,3,Tecate,1075,San Antonio                                                                                                   
+214,2,Baja California,3,Tecate,15,Los Hermanos                                                                                                  
+215,2,Baja California,4,Tijuana,1642,El Gandul                                                                                                     
+216,2,Baja California,4,Tijuana,1342,Familia Camarena                                                                                              
+217,2,Baja California,4,Tijuana,1134,Familia González Aguirre                                                                                      
+218,2,Baja California,4,Tijuana,298,El Florido                                                                                                    
+219,2,Baja California,1,Ensenada,1297,Colonia Costa Azul                                                                                            
+220,2,Baja California,4,Tijuana,1497,Santa Clara                                                                                                   
+221,2,Baja California,4,Tijuana,1439,Rancho Gutiérrez                                                                                              
+222,2,Baja California,1,Ensenada,4925,Balcones Cíbolas del Mar                                                                                      
+223,2,Baja California,5,Playas de Rosarito,81,El Pescador [Centro Turístico]                                                                                
+224,2,Baja California,3,Tecate,783,San José                                                                                                      
+225,2,Baja California,2,Mexicali,186,Ejido Guanajuato                                                                                              
+226,2,Baja California,5,Playas de Rosarito,10,Campo López                                                                                                   
+227,2,Baja California,4,Tijuana,2136,Lomelí [Rancho]                                                                                               
+228,2,Baja California,5,Playas de Rosarito,244,Ninguno                                                                                                       
+229,2,Baja California,2,Mexicali,4729,Granjas Arcoíris                                                                                              
+230,2,Baja California,6,San Quintín,819,Santa Candelaria                                                                                              
+231,2,Baja California,2,Mexicali,2282,Familia Llamas (Ejido Campeche)                                                                               
+232,2,Baja California,1,Ensenada,5534,Familia Arce                                                                                                  
+233,2,Baja California,2,Mexicali,2818,Familia Verdugo (Ejido Tamaulipas Parcela Veintiocho)                                                         
+234,2,Baja California,6,San Quintín,721,Rancho Jiménez                                                                                                
+235,2,Baja California,2,Mexicali,2449,Familia Mosqueda (Veracruz Dos)                                                                               
+236,2,Baja California,2,Mexicali,2204,Familia Hernández (Ejido Durango)                                                                             
+237,2,Baja California,2,Mexicali,3124,El Solitario (Ejido Chihuahua)                                                                                
+238,2,Baja California,2,Mexicali,5528,Ramos                                                                                                         
+239,2,Baja California,1,Ensenada,3831,Bodegas del Valle                                                                                             
+240,2,Baja California,1,Ensenada,617,El Porvenir (Guadalupe)                                                                                       
+241,2,Baja California,2,Mexicali,259,Colonia Pólvora                                                                                               
+242,2,Baja California,2,Mexicali,1594,Bachoco (Colonia Cerro Prieto) [Avícola]                                                                      
+243,2,Baja California,2,Mexicali,161,Ejido Monterrey (Colonia Batáquez)                                                                            
+244,2,Baja California,6,San Quintín,3,ABC (Los Canelos) [Empaque]                                                                                   
+245,2,Baja California,2,Mexicali,2237,Familia Jiménez (Veracruz Dos)                                                                                
+246,2,Baja California,3,Tecate,1191,San Isidro (Los Tres Juanes)                                                                                  
+247,2,Baja California,2,Mexicali,4962,Ninguno [Familia Pérez]                                                                                       
+248,2,Baja California,2,Mexicali,169,Ejido Durango                                                                                                 
+249,2,Baja California,2,Mexicali,2277,Familia Lizalde (Ejido Benito Juárez)                                                                         
+250,2,Baja California,2,Mexicali,1832,Familia Calvillo (Colonia Osiris Parcela 5)                                                                   
+251,2,Baja California,2,Mexicali,127,Ejido Tabasco                                                                                                 
+252,2,Baja California,6,San Quintín,122,Ejido Profesor Graciano Sánchez                                                                               
+253,2,Baja California,2,Mexicali,203,Ejido Jalisco                                                                                                 
+254,2,Baja California,1,Ensenada,386,Rancho Campa                                                                                                  
+255,2,Baja California,2,Mexicali,2616,Zona del Canal (Veracruz Dos)                                                                                 
+256,2,Baja California,2,Mexicali,251,Ejido Pátzcuaro                                                                                               
+257,2,Baja California,1,Ensenada,3368,Artículo Ciento Quince                                                                                        
+258,2,Baja California,6,San Quintín,498,La Trinidad                                                                                                   
+259,2,Baja California,5,Playas de Rosarito,36,El Descanso                                                                                                   
+260,2,Baja California,1,Ensenada,2160,Úrsulo Galván                                                                                                 
+261,2,Baja California,2,Mexicali,5006,Cipsa                                                                                                         
+262,2,Baja California,2,Mexicali,1273,Ejido Tehuantepec (Santa Rosa)                                                                                
+263,2,Baja California,1,Ensenada,2071,Treinta y Tres [Rancho]                                                                                       
+264,2,Baja California,2,Mexicali,2123,Familia Gómez (Colonia Cerro Prieto)                                                                          
+265,2,Baja California,2,Mexicali,2855,Familia Rodelo Salgado (Colonia Cerro Prieto)                                                                 
+266,2,Baja California,2,Mexicali,5105,Valle del Sol [Rancho]                                                                                        
+267,2,Baja California,2,Mexicali,5075,Familia Fernández                                                                                             
+268,2,Baja California,1,Ensenada,1444,La Jolla [Campo Turístico]                                                                                    
+269,2,Baja California,2,Mexicali,4877,Don Manuel                                                                                                    
+270,2,Baja California,2,Mexicali,2128,Familia González (Colonia Sonora)                                                                             
+271,2,Baja California,1,Ensenada,5167,Rancho Virginia del Mar                                                                                       
+272,2,Baja California,5,Playas de Rosarito,34,Cuenca Lechera                                                                                                
+273,2,Baja California,1,Ensenada,2482,Familia Alaniz                                                                                                
+274,2,Baja California,5,Playas de Rosarito,382,Los Cañaverales                                                                                               
+275,2,Baja California,5,Playas de Rosarito,312,Ninguno                                                                                                       
+276,2,Baja California,5,Playas de Rosarito,322,Mar de Popotla                                                                                                
+277,2,Baja California,1,Ensenada,5037,Colinas del Pedregal                                                                                          
+278,2,Baja California,5,Playas de Rosarito,28,Misión del Mar 1ra. y 2da. Sección                                                                            
+279,2,Baja California,5,Playas de Rosarito,160,Rancho Santini                                                                                                
+280,2,Baja California,5,Playas de Rosarito,78,El Morro Kilómetro Treinta y Ocho                                                                             
+281,2,Baja California,5,Playas de Rosarito,202,Marbella                                                                                                      
+282,2,Baja California,6,San Quintín,583,Luis Rodríguez (El Vergel)                                                                                    
+283,2,Baja California,5,Playas de Rosarito,266,Lomas de Puerto Nuevo                                                                                         
+284,2,Baja California,5,Playas de Rosarito,137,Las Delicias                                                                                                  
+285,2,Baja California,4,Tijuana,669,Calete                                                                                                        
+286,2,Baja California,1,Ensenada,2142,Buena Vista                                                                                                   
+287,2,Baja California,1,Ensenada,3170,Campo Número Siete                                                                                            
+288,2,Baja California,7,San Felipe                                                                  ,220,Puertecitos                                                                                                   
+289,2,Baja California,1,Ensenada,677,El Ramajal                                                                                                    
+290,2,Baja California,5,Playas de Rosarito,300,Los Arroyos                                                                                                   
+291,2,Baja California,1,Ensenada,4523,II Sección Ejido Esteban Cantú                                                                                
+292,2,Baja California,6,San Quintín,114,Ejido José María Morelos                                                                                      
+293,2,Baja California,6,San Quintín,839,Santo Domingo                                                                                                 
+294,2,Baja California,5,Playas de Rosarito,84,Playas la Misión                                                                                              
+295,2,Baja California,5,Playas de Rosarito,355,Hacienda del Sol                                                                                              
+296,2,Baja California,6,San Quintín,858,Valle Dorado                                                                                                  
+297,2,Baja California,4,Tijuana,1619,Los González                                                                                                  
+298,2,Baja California,2,Mexicali,1481,Familia Manzo (Colonia Colorado Número Siete)                                                                 
+299,2,Baja California,4,Tijuana,219,El Refugio                                                                                                    
+300,2,Baja California,4,Tijuana,1085,Rancho Díaz                                                                                                   
+301,2,Baja California,1,Ensenada,4702,Fraccionamiento del Valle                                                                                     
+302,2,Baja California,6,San Quintín,79,Colonia Benito Juárez                                                                                         
+303,2,Baja California,1,Ensenada,3726,Parcela Cuarenta y Nueve (Ejido Nacionalista)                                                                 
+304,2,Baja California,2,Mexicali,522,El Mirador (Colonia Independencia Económica)                                                                  
+305,2,Baja California,3,Tecate,682,Las Calabazas                                                                                                 
+306,2,Baja California,3,Tecate,934,Ejido Encinal                                                                                                 
+307,2,Baja California,1,Ensenada,4973,Brechas el Mirador                                                                                            
+308,2,Baja California,2,Mexicali,4695,Nuevo Milenium                                                                                                
+309,2,Baja California,1,Ensenada,1065,La Providencia                                                                                                
+310,2,Baja California,3,Tecate,131,El Testerazo                                                                                                  
+311,2,Baja California,2,Mexicali,5489,Familia Meza (Colonia Progreso)                                                                               
+312,2,Baja California,3,Tecate,995,San Miguel [Rancho]                                                                                           
+313,2,Baja California,1,Ensenada,118,Licenciado Gustavo Díaz Ordaz                                                                                 
+314,2,Baja California,1,Ensenada,3800,Parcela Número Ciento Sesenta y Uno (Ejido Nacionalista)                                                      
+315,2,Baja California,6,San Quintín,461,La Espinita [Restaurante]                                                                                     
+316,2,Baja California,2,Mexicali,1998,Familia Estrada (Colonia Pólvora)                                                                             
+317,2,Baja California,7,San Felipe                                                                  ,267,Villas Mar de Cortez (Rancho Grande)                                                                          
+318,2,Baja California,1,Ensenada,5324,Clam Beach [Campamento]                                                                                       
+319,2,Baja California,2,Mexicali,1181,Ejido Mezquital                                                                                               
+320,2,Baja California,2,Mexicali,211,Ejido Lázaro Cárdenas (La Mosca)                                                                              
+321,2,Baja California,6,San Quintín,134,El Barril                                                                                                     
+322,2,Baja California,1,Ensenada,195,Ejido Rodolfo Sánchez Taboada (El Calvario)                                                                   
+323,2,Baja California,7,San Felipe                                                                  ,254,Serena [Campo]                                                                                                
+324,2,Baja California,2,Mexicali,258,Ejido Plan de Ayala                                                                                           
+325,2,Baja California,6,San Quintín,603,Misión Santa Gertrudis la Magna                                                                               
+326,2,Baja California,5,Playas de Rosarito,260,Familia Mata                                                                                                  
+327,2,Baja California,2,Mexicali,282,Ejido Saltillo                                                                                                
+328,2,Baja California,1,Ensenada,2154,Mal Paso                                                                                                      
+329,2,Baja California,2,Mexicali,2274,Familia Limón (Colonia Primavera)                                                                             
+330,2,Baja California,4,Tijuana,1309,Santo Tomás [Establo]                                                                                         
+331,2,Baja California,1,Ensenada,242,Santo Tomás                                                                                                   
+332,2,Baja California,2,Mexicali,5133,Familia Romero                                                                                                
+333,2,Baja California,1,Ensenada,3706,Parcela Número Cuarenta y Tres (Ejido Nacionalista)                                                           
+334,2,Baja California,3,Tecate,933,Loma Tova                                                                                                     
+335,2,Baja California,2,Mexicali,242,Ejido Yucatán                                                                                                 
+336,2,Baja California,2,Mexicali,256,Estación Pescaderos (Kilómetro Treinta y Nueve)                                                               
+337,2,Baja California,5,Playas de Rosarito,3,Bahía Cantiles (Cantiles Dorados)                                                                             
+338,2,Baja California,6,San Quintín,80,Colonia Concordia                                                                                             
+339,2,Baja California,1,Ensenada,5551,El Chueco                                                                                                     
+340,2,Baja California,1,Ensenada,5107,Ninguno [Estación de Servicio]                                                                                
+341,2,Baja California,1,Ensenada,3697,Parcela Número Seis (Ejido Nacionalista)                                                                      
+342,2,Baja California,5,Playas de Rosarito,444,Potrero de en Medio                                                                                           
+343,2,Baja California,5,Playas de Rosarito,150,Rancho Reynoso                                                                                                
+344,2,Baja California,3,Tecate,300,Las Palmas                                                                                                    
+345,2,Baja California,1,Ensenada,852,Las Delicias                                                                                                  
+346,2,Baja California,1,Ensenada,3564,Familia Solorio                                                                                               
+347,2,Baja California,5,Playas de Rosarito,238,Santa Isabel del Mar                                                                                          
+348,2,Baja California,4,Tijuana,1766,Baja Malibú                                                                                                   
+349,2,Baja California,2,Mexicali,311,Colonia José María Rodríguez Mérida (La Panga)                                                                
+350,2,Baja California,4,Tijuana,1298,Los Delfines                                                                                                  
+351,2,Baja California,6,San Quintín,112,Ejido General Leandro Valle                                                                                   
+352,2,Baja California,7,San Felipe                                                                  ,61,De un Rancho a Otro                                                                                           
+353,2,Baja California,5,Playas de Rosarito,361,Villas de San Ángel                                                                                           
+354,2,Baja California,5,Playas de Rosarito,82,La Pitaya                                                                                                     
+355,2,Baja California,5,Playas de Rosarito,8,El Campito                                                                                                    
+356,2,Baja California,1,Ensenada,4930,Playa Cibola del Mar                                                                                          
+357,2,Baja California,6,San Quintín,533,Lira [Rancho]                                                                                                 
+358,2,Baja California,5,Playas de Rosarito,304,El Morro                                                                                                      
+359,2,Baja California,6,San Quintín,691,Ranchito Meza                                                                                                 
+360,2,Baja California,1,Ensenada,2518,Quinta Riviera (Rancho Rocha)                                                                                 
+361,2,Baja California,2,Mexicali,212,Poblado Lázaro Cárdenas (La Veintiocho)                                                                       
+362,2,Baja California,4,Tijuana,2127,Familia Tovar                                                                                                 
+363,2,Baja California,2,Mexicali,482,Familia Castro [Rancho]                                                                                       
+364,2,Baja California,3,Tecate,1615,Los Laureles                                                                                                  
+365,2,Baja California,2,Mexicali,4925,Renacimiento del Valle                                                                                        
+366,2,Baja California,5,Playas de Rosarito,2,Alisitos                                                                                                      
+367,2,Baja California,5,Playas de Rosarito,395,El Paraíso                                                                                                    
+368,2,Baja California,2,Mexicali,5225,Crucero Nuevo León                                                                                            
+369,2,Baja California,3,Tecate,937,General Felipe Ángeles                                                                                        
+370,2,Baja California,4,Tijuana,678,Real del Mar                                                                                                  
+371,2,Baja California,4,Tijuana,2125,Laguna [Rancho]                                                                                               
+372,2,Baja California,2,Mexicali,7065,Cadena Comercial Oxxo S.A. de C.V.                                                                            
+373,2,Baja California,5,Playas de Rosarito,37,Colonia Morelos                                                                                               
+374,2,Baja California,1,Ensenada,2492,Rancho Cortez                                                                                                 
+375,2,Baja California,6,San Quintín,620,Ninguno                                                                                                       
+376,2,Baja California,7,San Felipe                                                                  ,261,Ventana del Mar                                                                                               
+377,2,Baja California,7,San Felipe                                                                  ,272,Vista del Mar                                                                                                 
+378,2,Baja California,5,Playas de Rosarito,86,Popotla                                                                                                       
+379,2,Baja California,2,Mexicali,1668,La Colorado (Colonia Colorado)                                                                                
+380,2,Baja California,1,Ensenada,4754,Ninguno                                                                                                       
+381,2,Baja California,4,Tijuana,1388,Las Quintas Escondidas                                                                                        
+382,2,Baja California,1,Ensenada,3381,Ejido el Ajusco                                                                                               
+383,2,Baja California,5,Playas de Rosarito,418,El Mirador [Fraccionamiento]                                                                                  
+384,2,Baja California,1,Ensenada,3289,San Antonio [Bodegas]                                                                                         
+385,2,Baja California,5,Playas de Rosarito,424,La Banderita                                                                                                  
+386,2,Baja California,6,San Quintín,874,Colonia las Palmas (Vista al Mar)
+387,2,Baja California,1,Ensenada,4342,Campo Número Nueve                                                                                            
+388,2,Baja California,5,Playas de Rosarito,276,Casa del Rey [Fraccionamiento]                                                                                
+389,2,Baja California,2,Mexicali,1653,La División (Colonia Venustiano Carranza)                                                                     
+390,2,Baja California,2,Mexicali,2435,Doña Bertha [Rancho]                                                                                          
+391,2,Baja California,2,Mexicali,553,La Rosita                                                                                                     
+392,2,Baja California,1,Ensenada,3756,Parcela Noventa y Ocho                                                                                        
+393,2,Baja California,1,Ensenada,2151,Punta Piedra                                                                                                  
+394,2,Baja California,5,Playas de Rosarito,222,Río Misión                                                                                                    
+395,2,Baja California,3,Tecate,1439,Rancho Esthercita                                                                                             
+396,2,Baja California,1,Ensenada,2502,Villas de San Miguel                                                                                          
+397,2,Baja California,2,Mexicali,4730,El Sauzalito                                                                                                  
+398,2,Baja California,2,Mexicali,2820,Familia Verdugo (Ejido Cucapah Mestizo)                                                                       
+399,2,Baja California,4,Tijuana,1886,La Recría [Rancho]                                                                                            
+400,2,Baja California,4,Tijuana,732,El Indio                                                                                                      
+401,2,Baja California,2,Mexicali,1317,El Arenal                                                                                                     
+402,2,Baja California,7,San Felipe                                                                  ,140,La Poma [Campo]                                                                                               
+403,2,Baja California,2,Mexicali,5021,Familia Vega                                                                                                  
+404,2,Baja California,4,Tijuana,2049,El Refugio                                                                                                    
+405,2,Baja California,1,Ensenada,3732,Parcela Número Cincuenta y Siete (Familia Arce)                                                               
+406,2,Baja California,2,Mexicali,4904,Familia Álvarez                                                                                               
+407,2,Baja California,1,Ensenada,3691,Parcela Ocho (Ejido Nacionalista)                                                                             
+408,2,Baja California,3,Tecate,114,San José                                                                                                      
+409,2,Baja California,2,Mexicali,3135,Rancho Fonseca (Ejido Hermosillo)                                                                             
+410,2,Baja California,1,Ensenada,1025,Poblado Héroes de Chapultepec                                                                                 
+411,2,Baja California,1,Ensenada,3382,Ejido Jatay                                                                                                   
+412,2,Baja California,2,Mexicali,1975,Colonia la 27 (Campamento SARH Kilómetro Veintisiete)                                                         
+413,2,Baja California,1,Ensenada,3625,Jatay de Cutuy                                                                                                
+414,2,Baja California,1,Ensenada,3606,Brisas del Mar                                                                                                
+415,2,Baja California,4,Tijuana,1393,Rancho AGR                                                                                                    
+416,2,Baja California,3,Tecate,1023,La Puerta                                                                                                     
+417,2,Baja California,1,Ensenada,2157,Puerto Salina                                                                                                 
+418,2,Baja California,2,Mexicali,1896,Familia Chávez (Ejido Lázaro Cárdenas)                                                                        
+419,2,Baja California,2,Mexicali,1545,Familia Acosta                                                                                                
+420,2,Baja California,2,Mexicali,5468,El Chimal                                                                                                     
+421,2,Baja California,1,Ensenada,5172,Barón Balché                                                                                                  
+422,2,Baja California,4,Tijuana,1604,La Morita                                                                                                     
+423,2,Baja California,2,Mexicali,2424,Familia Montes (Colonia Progreso)                                                                             
+424,2,Baja California,2,Mexicali,5223,Casa de Retiro Arcoíris                                                                                       
+425,2,Baja California,3,Tecate,1904,El Paraíso [Rancho]                                                                                           
+426,2,Baja California,4,Tijuana,1385,Playa Blanca                                                                                                  
+427,2,Baja California,5,Playas de Rosarito,414,Calafia Paradaise Resort and Villas (Torres Calafia)                                                          
+428,2,Baja California,2,Mexicali,2517,Colonia Herradura                                                                                             
+429,2,Baja California,1,Ensenada,2159,Angels [Campo]                                                                                                
+430,2,Baja California,7,San Felipe                                                                  ,126,La Costilla [Campo]                                                                                           
+431,2,Baja California,7,San Felipe                                                                  ,155,Los Compadres                                                                                                 
+432,2,Baja California,7,San Felipe                                                                  ,156,Los Delfines [Campo]                                                                                          
+433,2,Baja California,7,San Felipe                                                                  ,32,Campo Ocotillos                                                                                               
+434,2,Baja California,7,San Felipe                                                                  ,16,Brisamar [Campo]                                                                                              
+435,2,Baja California,7,San Felipe                                                                  ,24,Campo César                                                                                                   
+436,2,Baja California,7,San Felipe                                                                  ,145,Las Encantadas [Campo]                                                                                        
+437,2,Baja California,7,San Felipe                                                                  ,269,Violeta (Playa Corrales)                                                                                      
+438,2,Baja California,5,Playas de Rosarito,196,Marena [Club]                                                                                                 
+439,2,Baja California,1,Ensenada,2691,Baja Mar San Diego                                                                                            
+440,2,Baja California,2,Mexicali,4747,Los Manantiales                                                                                               
+441,2,Baja California,1,Ensenada,3173,Lomas del Mar                                                                                                 
+442,2,Baja California,1,Ensenada,2221,Playa Dorada [Campo]                                                                                          
+443,2,Baja California,5,Playas de Rosarito,301,Montemar                                                                                                      
+444,2,Baja California,7,San Felipe                                                                  ,194,Petes Camp El Paraíso                                                                                         
+445,2,Baja California,7,San Felipe                                                                  ,47,Cimarrón [Campo]                                                                                              
+446,2,Baja California,5,Playas de Rosarito,73,El Médano                                                                                                     
+447,2,Baja California,4,Tijuana,2012,Santa Clara                                                                                                   
+448,2,Baja California,4,Tijuana,1811,Encanto del Mar                                                                                               
+449,2,Baja California,5,Playas de Rosarito,386,Palacio del Mar                                                                                               
+450,2,Baja California,3,Tecate,1599,Los Campillo                                                                                                  
+451,2,Baja California,2,Mexicali,1471,Cerro Prieto Cuatro                                                                                           
+452,2,Baja California,1,Ensenada,5892,El Coyote [Rancho]                                                                                            
+453,2,Baja California,1,Ensenada,3783,Parcela Número Ciento Treinta y Nueve (Ejido Nacionalista)                                                    
+454,2,Baja California,2,Mexicali,3479,Las Palmas (Colonia Colorado Número Tres)                                                                     
+455,2,Baja California,3,Tecate,1004,Rancho Jonathan                                                                                               
+456,2,Baja California,7,San Felipe                                                                  ,262,Versoleil                                                                                                     
+457,2,Baja California,6,San Quintín,99,Don Diego [Posada]                                                                                            
+458,2,Baja California,4,Tijuana,671,Santa Teresita                                                                                                
+459,2,Baja California,5,Playas de Rosarito,377,Ciudad de Misericordia                                                                                        
+460,2,Baja California,3,Tecate,1012,San Joaquín                                                                                                   
+461,2,Baja California,5,Playas de Rosarito,22,Valles del Mar                                                                                                
+462,2,Baja California,5,Playas de Rosarito,427,Rancho la Hermosa [Casa Hogar]                                                                                
+463,2,Baja California,4,Tijuana,1874,Terrazas de San Ángel                                                                                         
+464,2,Baja California,6,San Quintín,92,Cristo por su Mundo [Orfanatorio]                                                                             
+465,2,Baja California,5,Playas de Rosarito,188,Ninguno                                                                                                       
+466,2,Baja California,5,Playas de Rosarito,162,Terrazas del Mar                                                                                              
+467,2,Baja California,1,Ensenada,2141,Door of Faith Orphanage [Orfanato]                                                                            
+468,2,Baja California,4,Tijuana,542,Las Dos Palmas                                                                                                
+469,2,Baja California,5,Playas de Rosarito,388,Guzmán [Rancho]                                                                                               
+470,2,Baja California,5,Playas de Rosarito,279,Palmar Paradise [Centro Recreativo]                                                                           
+471,2,Baja California,1,Ensenada,2190,La Grulla SC (La Grulla) [Club de Cazadores]                                                                  
+472,2,Baja California,5,Playas de Rosarito,350,Candiles Dorados                                                                                              
+473,2,Baja California,3,Tecate,1604,Tanamá (Las Tejas) [Balneario]                                                                                
+474,2,Baja California,7,San Felipe                                                                  ,3,Alfonsinas                                                                                                    
+475,2,Baja California,5,Playas de Rosarito,419,Rodríguez [Campo]                                                                                             
+476,2,Baja California,5,Playas de Rosarito,432,Ventura [Parcela Cincuenta y Tres]                                                                            
+477,2,Baja California,1,Ensenada,600,De los Niños [Rancho)                                                                                         
+478,2,Baja California,7,San Felipe                                                                  ,59,Cristina [Campo]                                                                                              
+479,2,Baja California,7,San Felipe                                                                  ,22,Campo Beluga                                                                                                  
+480,2,Baja California,7,San Felipe                                                                  ,36,Campo Sacrificio                                                                                              
+481,2,Baja California,1,Ensenada,3329,Campo Número Cinco                                                                                            
+482,2,Baja California,7,San Felipe                                                                  ,190,Papá Fernández [Campo]                                                                                        
+483,2,Baja California,7,San Felipe                                                                  ,203,Playa del Sol                                                                                                 
+484,2,Baja California,7,San Felipe                                                                  ,221,Punta Bufeo [Campo Turístico]                                                                                 
+485,2,Baja California,1,Ensenada,2485,San Antonio de las Minas                                                                                      
+486,2,Baja California,5,Playas de Rosarito,76,El Morro                                                                                                      
+487,2,Baja California,5,Playas de Rosarito,83,Rancho Evelia                                                                                                 
+488,2,Baja California,5,Playas de Rosarito,212,Cumbres de Popotla                                                                                            
+489,2,Baja California,6,San Quintín,43,Campo Daggets                                                                                                 
+490,2,Baja California,1,Ensenada,2487,Ejido Ley Federal de Reforma Agraria (El Tigre)                                                               
+491,2,Baja California,6,San Quintín,500,La Ventana [Campo]                                                                                            
+492,2,Baja California,7,San Felipe                                                                  ,81,El Dorado (Ejido Plan Nacional Agrario)                                                                       
+493,2,Baja California,5,Playas de Rosarito,163,De Raúl [Centro Turístico]                                                                                    
+494,2,Baja California,1,Ensenada,5771,Fuego Viñedo                                                                                                  
+495,2,Baja California,5,Playas de Rosarito,197,Martín Cuevas                                                                                                 
+496,2,Baja California,1,Ensenada,5329,La Escondida                                                                                                  
+497,2,Baja California,2,Mexicali,4986,Hacienda Mexicali [Hotel]                                                                                     
+498,2,Baja California,3,Tecate,1580,El Moro                                                                                                       
+499,2,Baja California,6,San Quintín,483,La Pinta [Hotel]                                                                                              
+500,2,Baja California,5,Playas de Rosarito,59,Las Rocas [Hotel]                                                                                             
+501,2,Baja California,6,San Quintín,581,Los Vientos                                                                                                   
+502,2,Baja California,6,San Quintín,68,Cataviña                                                                                                      
+503,2,Baja California,1,Ensenada,5187,Genaro Vázquez Rojas [Fraccionamiento Popular]                                                                
+504,2,Baja California,1,Ensenada,942,Uruapan                                                                                                       
+505,2,Baja California,6,San Quintín,49,Campo Lobo                                                                                                    
+506,2,Baja California,1,Ensenada,3593,Las Lomas [Residencial Campestre]                                                                             
+507,2,Baja California,5,Playas de Rosarito,207,Puestas del Sol                                                                                               
+508,2,Baja California,5,Playas de Rosarito,51,La Fonda [Campo Turístico]                                                                                    
+509,2,Baja California,1,Ensenada,5153,Las Mariposas [Rancho]                                                                                        
+510,2,Baja California,1,Ensenada,3283,Baja Beach and Tennis Club                                                                                    
+511,2,Baja California,1,Ensenada,5446,Familia Garibay                                                                                               
+512,2,Baja California,1,Ensenada,5155,Coronel Esteban Cantú [Tercera Sección]                                                                       
+513,2,Baja California,5,Playas de Rosarito,243,Costa Azul                                                                                                    
+514,2,Baja California,1,Ensenada,5907,Campo Meneses                                                                                                 
+515,2,Baja California,1,Ensenada,2776,Playa Saldamando                                                                                              
+516,2,Baja California,1,Ensenada,2463,El Venado                                                                                                     
+517,2,Baja California,5,Playas de Rosarito,316,El Médano                                                                                                     
+518,2,Baja California,6,San Quintín,711,Rancho Escondido                                                                                              
+519,2,Baja California,3,Tecate,1482,Rancho Ojay                                                                                                   
+520,2,Baja California,6,San Quintín,223,El Rincón                                                                                                     
+521,2,Baja California,6,San Quintín,605,Molino Viejo                                                                                                  
+522,2,Baja California,1,Ensenada,1015,Emiliano Zapata                                                                                               
+523,2,Baja California,6,San Quintín,654,Playa Tranquila [Campo]                                                                                       
+524,2,Baja California,5,Playas de Rosarito,74,Medio Camino                                                                                                  
+525,2,Baja California,5,Playas de Rosarito,314,Kilómetro Cuarenta y Tres                                                                                     
+526,2,Baja California,1,Ensenada,585,El Mogor                                                                                                      
+527,2,Baja California,5,Playas de Rosarito,227,Rancho el Descanso                                                                                            
+528,2,Baja California,1,Ensenada,3834,Puerto el Zeppelín (Campo Kennedy)                                                                            
+529,2,Baja California,6,San Quintín,47,Campo Harchelón                                                                                               
+530,2,Baja California,6,San Quintín,473,La Lobera                                                                                                     
+531,2,Baja California,7,San Felipe                                                                  ,266,Villas de Cortez                                                                                              
+532,2,Baja California,5,Playas de Rosarito,75,Misión Viejo                                                                                                  
+533,2,Baja California,5,Playas de Rosarito,85,Plaza del Mar                                                                                                 
+534,2,Baja California,5,Playas de Rosarito,31,Costa Bella                                                                                                   
+535,2,Baja California,1,Ensenada,1812,San Miguel (Cíbolas de Mar)                                                                                   
+536,2,Baja California,4,Tijuana,1223,Club Tijuana                                                                                                  
+537,2,Baja California,4,Tijuana,1221,San Inocencio (Proyecto México) [Casa Hogar]                                                                  
+538,2,Baja California,1,Ensenada,5323,Casa Horizonte                                                                                                
+539,2,Baja California,4,Tijuana,2030,Bella Vista                                                                                                   
+540,2,Baja California,5,Playas de Rosarito,95,Campo Real                                                                                                    
+541,2,Baja California,5,Playas de Rosarito,401,Rocamar [Fraccionamiento]                                                                                     
+542,2,Baja California,4,Tijuana,1546,Casa Guadalupe (Villa de la Paz)                                                                              
+543,2,Baja California,5,Playas de Rosarito,288,Caracoles del Mar                                                                                             
+544,2,Baja California,1,Ensenada,5163,La Hermosa del Sauco                                                                                          
+545,2,Baja California,7,San Felipe                                                                  ,153,Los Amigos [Campo]                                                                                            
+546,2,Baja California,6,San Quintín,475,La Mesa                                                                                                       
+547,2,Baja California,1,Ensenada,3658,Tres Cruces [Rancho]                                                                                          
+548,2,Baja California,5,Playas de Rosarito,220,Perla Escondida                                                                                               
+549,2,Baja California,4,Tijuana,570,Universidad de las Naciones                                                                                   
