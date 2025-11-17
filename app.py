@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
 import pandas as pd
 import numpy as np
+import sqlite3
 
 app = Flask(__name__)
+DATABASE = './supplier.db'
 
 try:
     DF_ESTABLECIMIENTOS = pd.read_csv("bk_excel_db/bk_establecimientos.csv")
@@ -13,6 +15,12 @@ try:
 except FileNotFoundError:
     print("Error: Asegúrate de que los archivos CSV existan en 'bk_excel_db/'")
     exit()
+
+# --- Función para Conectar a SQLite ---
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row  # Permite acceder a las columnas por nombre
+    return conn
 
 # Funcion para calcular la distancia entre dos puntors por medio de la formula de Haversine
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -177,6 +185,133 @@ def simular_ubicacion():
         "longitud_objetivo": long
     }), 201
 
+
+####### Endpoints para Base de Datos SQLite ######
+@app.route("/api/sqlite/negocios", methods=["GET"])
+def get_sqlite_negocios():
+    """Consulta ID, Latitud y Longitud para la carga inicial del mapa."""
+    conn = get_db_connection()
+    
+    # Solo las columnas esenciales para el mapa
+    query = "SELECT id, latitud, longitud FROM establecimientos"
+    negocios = conn.execute(query).fetchall()
+    conn.close()
+    
+    if not negocios:
+        return jsonify({"mensaje": "No se encontraron negocios en SQLite"}), 204
+
+    # Convertir el resultado de SQLite a una lista de diccionarios
+    data_json = [dict(row) for row in negocios]
+    return jsonify(data_json), 200
+
+
+@app.route("/api/sqlite/negocio/<int:idNegocio>", methods=["GET"])
+def get_sqlite_negocio_detallado(idNegocio):
+    """Consultar los datos detallados de un negocio específico mediante JOINs en SQL."""
+    conn = get_db_connection()
+
+    # Usamos LEFT JOIN para que el negocio se muestre incluso si le faltan datos (contacto)
+    query = f"""
+    SELECT 
+        e.id, e.nom_estab, e.latitud, e.longitud,
+        t.codigo_acta, t.id_ubicacion, t.id_contacto,
+        a.nombre_act,
+        u.entidad, u.municipio, u.localidad,
+        c.telefono, c.correoelec, c.www
+    FROM 
+        establecimientos e
+    INNER JOIN 
+        tabla_final t ON e.id = t.id_establecimiento
+    LEFT JOIN 
+        acta a ON t.codigo_acta = a.codigo_act
+    LEFT JOIN 
+        ubicaiones u ON t.id_ubicacion = u.id_ubicacion
+    LEFT JOIN 
+        contacto c ON t.id_contacto = c.id_contancto
+    WHERE 
+        e.id = ?
+    """
+    
+    negocio = conn.execute(query, (idNegocio,)).fetchone()
+    conn.close()
+
+    if not negocio:
+        return jsonify({"mensaje": f"Negocio con ID {idNegocio} no encontrado en SQLite"}), 404
+        
+    # Estructurar la respuesta JSON (similar a la versión de Pandas)
+    row = dict(negocio)
+    respuesta = {
+        "id": row['id'],
+        "nombre_establecimiento": row['nom_estab'],
+        "latitud": row['latitud'],
+        "longitud": row['longitud'],
+        "actividad": {
+            "codigo": row['codigo_acta'],
+            "nombre": row['nombre_act']
+        },
+        "ubicacion": {
+            "id_ubicacion": row['id_ubicacion'],
+            "entidad": row['entidad'],
+            "municipio": row['municipio'],
+            "localidad": row['localidad']
+        },
+        "contacto": {
+            "id_contacto": row['id_contacto'],
+            "telefono": row['telefono'],
+            "correo": row['correoelec'],
+            "web": row['www']
+        }
+    }
+    return jsonify(respuesta), 200
+
+
+@app.route("/api/sqlite/proveedor/filtrar", methods=["GET"])
+def filtrar_sqlite_proveedores():
+    """Filtra proveedores por rubro (idActa) y proximidad geográfica."""
+    
+    try:
+        id_acta = request.args.get('idActa') # Se queda como string para la consulta SQL
+        lat_obj = float(request.args.get('lat'))
+        long_obj = float(request.args.get('long'))
+        radio_km = float(request.args.get('radio', 5)) 
+    except (ValueError, TypeError):
+        return jsonify({"error": "Parámetros idActa, lat y long son requeridos y deben ser números válidos."}), 400
+
+    conn = get_db_connection()
+    
+    # 1. Consultar Proveedores por idActa usando SQL
+    # Se une la tabla principal con la de establecimientos para obtener coordenadas.
+    query = f"""
+    SELECT 
+        e.id, e.nom_estab, e.latitud, e.longitud
+    FROM 
+        tabla_final t
+    INNER JOIN 
+        establecimientos e ON t.id_establecimiento = e.id
+    WHERE 
+        t.codigo_acta = ?
+    """
+    df_proveedores = pd.read_sql_query(query, conn, params=(id_acta,))
+    conn.close()
+
+    if df_proveedores.empty:
+        return jsonify({"mensaje": f"No se encontraron proveedores para la actividad {id_acta}."}), 204
+
+    # 2. Calcular la distancia Haversine (Pandas es ideal para esto)
+    df_proveedores['distancia_km'] = haversine_distance(
+        lat_obj, long_obj, 
+        df_proveedores['latitud'], df_proveedores['longitud']
+    )
+
+    # 3. Filtrar por radio geográfico
+    df_proveedores_final = df_proveedores[df_proveedores['distancia_km'] <= radio_km]
+
+    if df_proveedores_final.empty:
+        return jsonify({"mensaje": f"No se encontraron proveedores dentro de {radio_km} km para la actividad {id_acta}."}), 204
+        
+    # 4. Preparar la respuesta JSON
+    respuesta = df_proveedores_final[['id', 'nom_estab', 'latitud', 'longitud', 'distancia_km']].to_dict(orient='records')
+    return jsonify(respuesta), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
