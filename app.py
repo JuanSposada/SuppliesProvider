@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 import pandas as pd
 import numpy as np
 import sqlite3
+import time
+from functools import wraps
 
 app = Flask(__name__)
 DATABASE = './supplier.db'
@@ -41,11 +43,62 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return distance
 
 
+## Manejo de tasa de solicitudes por usuario (simple, en memoria)
+
+USERS_REQUESTS = {}
+# Ventana de tiempo y límite de solicitudes
+RATE_LIMIT_WINDOW = 60  # segundos (1 minuto)
+RATE_LIMIT_MAX_REQUESTS = 10 # 10 solicitudes por minuto
+
+def rate_limit(f):
+    """
+    Decorador para limitar el número de solicitudes por dirección IP.
+    Permite RATE_LIMIT_MAX_REQUESTS por RATE_LIMIT_WINDOW segundos.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Obtener la dirección IP del usuario (maneja proxy/load balancer)
+        # Esto es un mejor intento para obtener la IP real, aunque no infalible
+        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+        
+        # Obtener la hora actual
+        current_time = time.time()
+        
+        # Inicializar el historial si es la primera vez
+        if ip_address not in USERS_REQUESTS:
+            USERS_REQUESTS[ip_address] = []
+        
+        # Limpiar el historial: solo mantener las solicitudes dentro de la ventana de tiempo
+        # Solo las solicitudes más recientes que (tiempo_actual - ventana)
+        USERS_REQUESTS[ip_address] = [
+            t for t in USERS_REQUESTS[ip_address] 
+            if t > current_time - RATE_LIMIT_WINDOW
+        ]
+        
+        # Verificar si el límite ha sido excedido
+        if len(USERS_REQUESTS[ip_address]) >= RATE_LIMIT_MAX_REQUESTS:
+            # Respuesta 429 Too Many Requests
+            return jsonify({
+                "error": "Límite de solicitudes excedido.", 
+                "detalles": f"Solo se permiten {RATE_LIMIT_MAX_REQUESTS} solicitudes por minuto."
+            }), 429
+            
+        # Si no se excede, registrar la solicitud actual
+        USERS_REQUESTS[ip_address].append(current_time)
+        
+        # Continuar con la función original del endpoint
+        return f(*args, **kwargs)
+    return decorated_function
+
+#### Enpoints para exel (Pandas) ######
+
 @app.route("/")
+@rate_limit
 def hello_world():
     return "<h1>Whasaaaaa!!!! 🤪! Esta es la API de FindYourSupplier</h1>"
 
 @app.route("/api/excel/negocios", methods=['GET'])
+@rate_limit
 def get_negocios():
     df_mapa = DF_ESTABLECIMIENTOS[['id','latitud', 'longitud']]
     if df_mapa.empty:
@@ -55,6 +108,7 @@ def get_negocios():
     return jsonify(data_json), 200
 
 @app.route("/api/excel/negocio/<int:idNegocio>", methods=["GET"])
+@rate_limit
 def get_negocio_by_id(idNegocio):
     df_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL["id_establecimiento"] == idNegocio]
     if df_claves.empty:
@@ -109,6 +163,7 @@ def get_negocio_by_id(idNegocio):
 
 
 @app.route("/api/excel/proveedor/filtrar", methods=["GET"])
+@rate_limit
 def filtrar_proveedores():
     """Filtra proveedores por rubro (idActa) y proximidad geográfica."""
     
@@ -161,6 +216,7 @@ def filtrar_proveedores():
 
 
 @app.route("/api/excel/ubicacion/simular", methods=["POST"])
+@rate_limit
 def simular_ubicacion():
     """
     Recibe coordenadas (lat, long) en el cuerpo JSON para simular el Negocio Objetivo 
@@ -188,6 +244,7 @@ def simular_ubicacion():
 
 ####### Endpoints para Base de Datos SQLite ######
 @app.route("/api/sqlite/negocios", methods=["GET"])
+@rate_limit
 def get_sqlite_negocios():
     """Consulta ID, Latitud y Longitud para la carga inicial del mapa."""
     conn = get_db_connection()
@@ -206,6 +263,7 @@ def get_sqlite_negocios():
 
 
 @app.route("/api/sqlite/negocio/<int:idNegocio>", methods=["GET"])
+@rate_limit
 def get_sqlite_negocio_detallado(idNegocio):
     """Consultar los datos detallados de un negocio específico mediante JOINs en SQL."""
     conn = get_db_connection()
@@ -266,6 +324,7 @@ def get_sqlite_negocio_detallado(idNegocio):
 
 
 @app.route("/api/sqlite/proveedor/filtrar", methods=["GET"])
+@rate_limit
 def filtrar_sqlite_proveedores():
     """Filtra proveedores por rubro (idActa) y proximidad geográfica."""
     
