@@ -4,7 +4,13 @@
 // CONFIGURACIÓN INICIAL Y GLOBALES DEL MVP
 // ====================================================================
 
-const API_BASE = 'http://127.0.0.1:5000/api/excel'; 
+// Detecta si estamos en PythonAnywhere o en localhost
+const API_BASE = (
+    window.location.hostname.includes("pythonanywhere.com")
+)
+? `https://${window.location.hostname}/api/excel`
+: 'http://127.0.0.1:5000/api/excel';
+
 
 let mapa;
 // Capa para manejar el clustering de todos los marcadores (eficiencia)
