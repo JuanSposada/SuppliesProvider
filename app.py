@@ -49,7 +49,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 
 USERS_REQUESTS = {}
 RATE_LIMIT_WINDOW = 60  # segundos (1 minuto)
-RATE_LIMIT_MAX_REQUESTS = 10 # 10 solicitudes por minuto
+RATE_LIMIT_MAX_REQUESTS = 100 # 10 solicitudes por minuto
 
 def rate_limit(f):
     """
@@ -277,6 +277,28 @@ def simular_ubicacion():
         "longitud_objetivo": long
     }), 201
 
+# En app.py
+
+@app.route("/api/excel/rubros", methods=["GET"])
+@rate_limit
+def get_rubros():
+    """Devuelve la lista de todos los códigos de acta y sus nombres."""
+    try:
+        # Seleccionar solo las columnas necesarias para el dropdown
+        df_rubros = DF_ACTA[['codigo_act', 'nombre_act']].copy()
+        
+        # Opcional: limpiar NaNs si los hubiera y asegurar formato
+        df_rubros = df_rubros.dropna().drop_duplicates()
+        
+        # Convertir a una lista de diccionarios
+        data_json = df_rubros.to_dict(orient='records')
+        
+        return jsonify(data_json), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error en get_rubros: {e}")
+        return jsonify({"error": "Error interno del servidor al obtener la lista de rubros."}), 500
+    
 
 ####### Endpoints para Base de Datos SQLite ######
 # Nota: Estos endpoints están incluidos pero no se están utilizando en el frontend

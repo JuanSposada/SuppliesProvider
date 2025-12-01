@@ -29,6 +29,7 @@ function inicializarMapa() {
     // Agregar las capas al mapa
     markerClusterGroup.addTo(mapa);
     capaObjetivo.addTo(mapa); 
+    cargarRubrosDropdown();
 }
 
 // 4. Iniciar el mapa
@@ -118,14 +119,22 @@ function cargarTodosLosNegocios() {
                     const long = parseFloat(n.longitud);
 
                     const marcador = L.marker([lat, long], { id: n.id }) 
-                        .bindPopup(`<b>ID: ${n.id}</b><br>Haga clic para ver detalle.`);
+                        .bindPopup(`<b>ID: ${n.id}</b><br>Haga clic para ver detalle. D-Clic para Objetivo.`);
 
                     // Agregar al grupo de clústeres
                     markerClusterGroup.addLayer(marcador); 
 
-                    // Añadir listener para la carga dinámica de detalles
+                    // Listener 1: Clic simple para cargar detalles (mantener)
                     marcador.on('click', () => {
                         obtenerDetalle(n.id);
+                    });
+                    
+                    // Listener 2: DOBLE CLIC para establecer como Objetivo (¡Nuevo!)
+                    marcador.on('dblclick', () => {
+                        // 1. Actualizar el input
+                        document.getElementById('idObjetivo').value = n.id;
+                        // 2. Ejecutar la función de selección de objetivo
+                        seleccionarNegocioObjetivo();
                     });
 
                     bounds.push([lat, long]);
@@ -145,7 +154,6 @@ function cargarTodosLosNegocios() {
             alert(`Error de red o API: ${error.message}`);
         });
 }
-
 
 // ====================================================================
 // FUNCIONES DE FLUJO DEL MVP (Negocio Objetivo y Filtrado)
@@ -257,27 +265,26 @@ function ejecutarBusquedaProveedor() {
     console.log(`Ejecutando búsqueda: ${url}`);
     
     fetch(url)
-        .then(response => {
+        .then(async (response) => { // Usamos async para manejar errores de forma más limpia
+            if (response.status === 204) {
+                return { proveedores: [] }; // Maneja 204 No Content correctamente
+            }
+
+            const contentType = response.headers.get("content-type");
+            
             if (!response.ok) {
-                // Manejo explícito de 204 No Content (No hay resultados)
-                if (response.status === 204) {
-                    return { proveedores: [] };
+                // Para errores 4xx/5xx, intentamos leer el cuerpo para obtener el error JSON
+                if (contentType && contentType.includes("application/json")) {
+                    const err = await response.json();
+                    throw new Error(err.mensaje || `Error HTTP ${response.status}: ${JSON.stringify(err)}`);
+                } else {
+                    // Si no es JSON o no tiene cuerpo (es HTML de error), lanzamos un error genérico
+                    throw new Error(`Error HTTP: ${response.status} (${response.statusText || 'Error de servidor sin JSON válido'})`);
                 }
-                
-                // Manejo de otros errores (4xx, 5xx)
-                return response.json()
-                    .then(err => { 
-                        throw new Error(err.mensaje || `Error HTTP ${response.status}`); 
-                    })
-                    .catch(() => {
-                        // Captura errores de JSON (como Unexpected end of JSON input) o cuerpos vacíos
-                        throw new Error(`Error HTTP: ${response.status} (${response.statusText || 'Cuerpo de respuesta vacío'})`);
-                    });
             }
             
             // Si la respuesta es OK (200), leemos el JSON
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.indexOf("application/json") !== -1) {
+            if (contentType && contentType.includes("application/json")) {
                 return response.json();
             } else {
                  console.warn("Respuesta 200 OK pero sin contenido JSON esperado. Tratando como 0 resultados.");
@@ -317,7 +324,6 @@ function ejecutarBusquedaProveedor() {
 
             // 4. Ajustar el mapa para incluir ambos grupos de puntos
             try {
-                // EXTEND ahora funciona porque capaObjetivo es un L.FeatureGroup
                 mapa.fitBounds(markerClusterGroup.getBounds().extend(capaObjetivo.getBounds()));
             } catch (e) {
                 console.warn("No se pudo ajustar a los límites, probablemente no hay suficientes marcadores.", e);
@@ -333,7 +339,6 @@ function ejecutarBusquedaProveedor() {
             alert(`Error al buscar proveedores: ${error.message}`);
         });
 }
-
 /**
  * Función auxiliar para renderizar la lista de resultados en el panel de control.
  */
@@ -362,4 +367,41 @@ function actualizarListaResultados(proveedores) {
     }
 
     listaDiv.innerHTML = html;
+}
+
+function cargarRubrosDropdown() {
+    fetch(`${API_BASE}/rubros`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('No se pudo cargar la lista de rubros.');
+            }
+            return response.json();
+        })
+        .then(rubros => {
+            const select = document.getElementById('rubroBusqueda');
+            // Limpiar la opción de "Cargando..."
+            select.innerHTML = ''; 
+            
+            // Añadir una opción por defecto
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '--- Selecciona un Rubro ---';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
+
+            // Llenar el dropdown con los datos
+            rubros.forEach(rubro => {
+                const option = document.createElement('option');
+                option.value = rubro.codigo_act; // El valor que se envía a la API es el código
+                option.textContent = `[${rubro.codigo_act}] ${rubro.nombre_act}`; // El texto que ve el usuario
+                select.appendChild(option);
+            });
+            console.log(`Dropdown de rubros cargado con ${rubros.length} opciones.`);
+        })
+        .catch(error => {
+            console.error('Error al cargar el dropdown de rubros:', error);
+            const select = document.getElementById('rubroBusqueda');
+            select.innerHTML = `<option value="" disabled selected>${error.message}</option>`;
+        });
 }
