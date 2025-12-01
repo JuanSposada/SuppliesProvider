@@ -8,17 +8,25 @@ from functools import wraps
 app = Flask(__name__)
 DATABASE = './supplier.db'
 
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def load_csv(filename):
+    return pd.read_csv(os.path.join(BASE_DIR, "bk_excel_db", filename))
+
+
 # --- Carga Inicial de DataFrames (CSV) ---
 # Intenta cargar los archivos CSV al inicio de la aplicación
 try:
-    DF_ESTABLECIMIENTOS = pd.read_csv("bk_excel_db/bk_establecimientos.csv")
-    DF_ACTA = pd.read_csv("bk_excel_db/bk_acta.csv")
-    DF_UBICACIONES = pd.read_csv("bk_excel_db/bk_ubicaciones.csv")
-    DF_CONTACTO = pd.read_csv("bk_excel_db/bk_contacto.csv")
-    DF_TABLA_PRINCIPAL = pd.read_csv("bk_excel_db/bk_TABLA_FINAL_NORMALIZADA.csv")
+    DF_ESTABLECIMIENTOS = load_csv("bk_establecimientos.csv")
+    DF_ACTA = load_csv("bk_acta.csv")
+    DF_UBICACIONES = load_csv("bk_ubicaciones.csv")
+    DF_CONTACTO = load_csv("bk_contacto.csv")
+    DF_TABLA_PRINCIPAL = load_csv("bk_TABLA_FINAL_NORMALIZADA.csv")
 except FileNotFoundError:
-    print("Error: Asegúrate de que los archivos CSV existan en 'bk_excel_db/'")
-    exit()
+    raise RuntimeError("No se encontraron los archivos CSV en bk_excel_db")
+
 
 # --- Función para Conectar a SQLite ---
 def get_db_connection():
