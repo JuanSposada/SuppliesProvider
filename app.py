@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import pandas as pd
 import numpy as np
 import sqlite3
@@ -8,6 +8,8 @@ from functools import wraps
 app = Flask(__name__)
 DATABASE = './supplier.db'
 
+# --- Carga Inicial de DataFrames (CSV) ---
+# Intenta cargar los archivos CSV al inicio de la aplicación
 try:
     DF_ESTABLECIMIENTOS = pd.read_csv("bk_excel_db/bk_establecimientos.csv")
     DF_ACTA = pd.read_csv("bk_excel_db/bk_acta.csv")
@@ -46,7 +48,6 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 ## Manejo de tasa de solicitudes por usuario (simple, en memoria)
 
 USERS_REQUESTS = {}
-# Ventana de tiempo y límite de solicitudes
 RATE_LIMIT_WINDOW = 60  # segundos (1 minuto)
 RATE_LIMIT_MAX_REQUESTS = 10 # 10 solicitudes por minuto
 
@@ -58,18 +59,14 @@ def rate_limit(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Obtener la dirección IP del usuario (maneja proxy/load balancer)
-        # Esto es un mejor intento para obtener la IP real, aunque no infalible
         ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
         
-        # Obtener la hora actual
         current_time = time.time()
         
-        # Inicializar el historial si es la primera vez
         if ip_address not in USERS_REQUESTS:
             USERS_REQUESTS[ip_address] = []
         
-        # Limpiar el historial: solo mantener las solicitudes dentro de la ventana de tiempo
-        # Solo las solicitudes más recientes que (tiempo_actual - ventana)
+        # Limpiar el historial
         USERS_REQUESTS[ip_address] = [
             t for t in USERS_REQUESTS[ip_address] 
             if t > current_time - RATE_LIMIT_WINDOW
@@ -90,76 +87,111 @@ def rate_limit(f):
         return f(*args, **kwargs)
     return decorated_function
 
-#### Enpoints para exel (Pandas) ######
+#### Endpoints para Excel (Pandas) ######
 
 @app.route("/")
 @rate_limit
 def hello_world():
-    return "<h1>Whasaaaaa!!!! 🤪! Esta es la API de FindYourSupplier</h1>"
+    # Renderiza el mapa principal (index.html)
+    return render_template('index.html')
+
 
 @app.route("/api/excel/negocios", methods=['GET'])
 @rate_limit
 def get_negocios():
-    df_mapa = DF_ESTABLECIMIENTOS[['id','latitud', 'longitud']]
-    if df_mapa.empty:
-        return jsonify({"mensaje": "No se encontraron negocios"}), 204
+    """Endpoint para cargar todos los puntos del DENUE para el mapa inicial."""
+    try:
+        # Creamos una copia para trabajar y evitar SettingWithCopyWarning
+        df_mapa = DF_ESTABLECIMIENTOS[['id', 'latitud', 'longitud', 'nom_estab']].copy()
+        
+        # 1. Limpieza de NaN y Conversión de Tipo
+        df_mapa['id'] = pd.to_numeric(df_mapa['id'], errors='coerce')
+        df_mapa['latitud'] = pd.to_numeric(df_mapa['latitud'], errors='coerce')
+        df_mapa['longitud'] = pd.to_numeric(df_mapa['longitud'], errors='coerce')
+        
+        # 2. Eliminamos cualquier fila donde ID, latitud o longitud sea NaN
+        df_mapa = df_mapa.dropna(subset=['id', 'latitud', 'longitud'])
 
-    data_json = df_mapa.to_dict(orient='records')
-    return jsonify(data_json), 200
+        if df_mapa.empty:
+            return jsonify({"mensaje": "No se encontraron negocios válidos con coordenadas."}), 204
+
+        # 3. Serialización
+        data_json = df_mapa.to_dict(orient='records')
+        
+        return jsonify(data_json), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error en get_negocios: {e}")
+        return jsonify({"error": "Error interno del servidor al procesar los datos de establecimientos."}), 500
+
 
 @app.route("/api/excel/negocio/<int:idNegocio>", methods=["GET"])
 @rate_limit
 def get_negocio_by_id(idNegocio):
-    df_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL["id_establecimiento"] == idNegocio]
-    if df_claves.empty:
-        return jsonify({"mensaje": f"Negocio con ID {idNegocio} no encontrado en la tabla principal."}), 404
-    claves_data = df_claves.iloc[0].to_dict()
-    # 2. Obtener la información básica (Lat/Long y Nombre) de la tabla de establecimientos
-    df_establec = DF_ESTABLECIMIENTOS[DF_ESTABLECIMIENTOS["id"] == idNegocio]
-    if df_establec.empty:
-        # Esto podría pasar si el ID está en la tabla principal pero no en establecimientos
-        return jsonify({"mensaje": f"No se encontró información geográfica/nombre para el ID {idNegocio}."}), 404
-     
-    establec_data = df_establec.iloc[0].to_dict()
-    # a) Unir Actividad (usando codigo_acta)
-    act_code = claves_data.get('codigo_acta')
-    # Usamos DF_ACTA (tu nombre de variable)
-    act_info = DF_ACTA[DF_ACTA['codigo_act'] == act_code].iloc[0].to_dict() if act_code and not DF_ACTA[DF_ACTA['codigo_act'] == act_code].empty else {}
-    
-    # b) Unir Ubicación (usando id_ubicacion)
-    ubic_id = claves_data.get('id_ubicacion')
-    ubic_info = DF_UBICACIONES[DF_UBICACIONES['id_ubicacion'] == ubic_id].iloc[0].to_dict() if ubic_id and not DF_UBICACIONES[DF_UBICACIONES['id_ubicacion'] == ubic_id].empty else {}
-    
-    # c) Unir Contacto (usando id_contacto)
-    cont_id = claves_data.get('id_contancto')
-    cont_info = DF_CONTACTO[DF_CONTACTO['id_contancto'] == cont_id].iloc[0].to_dict() if cont_id and not DF_CONTACTO[DF_CONTACTO['id_contancto'] == cont_id].empty else {}
-    respuesta = {
-        "id": establec_data.get('id'),
-        "nombre_establecimiento": establec_data.get('nom_estab'),
-        "latitud": establec_data.get('latitud'),
-        "longitud": establec_data.get('longitud'),
+    """Consulta la información detallada de un solo negocio por su ID."""
+    try:
+        # 1. Obtener claves de la tabla principal
+        df_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL["id_establecimiento"] == idNegocio]
+        if df_claves.empty:
+            return jsonify({"mensaje": f"Negocio con ID {idNegocio} no encontrado en la tabla principal."}), 404
+        claves_data = df_claves.iloc[0].to_dict()
         
-        "actividad": {
-            "codigo": act_info.get('codigo_act'),
-            "nombre": act_info.get('nombre_act')
-        },
+        # 2. Obtener la información básica (Lat/Long y Nombre) de la tabla de establecimientos
+        df_establec = DF_ESTABLECIMIENTOS[DF_ESTABLECIMIENTOS["id"] == idNegocio]
+        if df_establec.empty:
+            return jsonify({"mensaje": f"No se encontró información geográfica/nombre para el ID {idNegocio}."}), 404
+          
+        establec_data = df_establec.iloc[0].to_dict()
         
-        "ubicacion_keys": {
-            "id_ubicacion": ubic_info.get('id_ubicacion'),
-            "entidad": ubic_info.get('entidad'),
-            "municipio": ubic_info.get('municipio'),
-            "localidad": ubic_info.get('localidad')
-        },
+        # 3. Realizar LOOKUPS (Busquedas) en tablas auxiliares
         
-        "contacto": {
-            "id_contacto": cont_info.get('id_contancto'),
-            "telefono": cont_info.get('telefono'),
-            "correo": cont_info.get('correoelec'),
-            "web": cont_info.get('www')
+        # a) Unir Actividad (usando codigo_acta)
+        act_code = claves_data.get('codigo_acta')
+        df_act = DF_ACTA[DF_ACTA['codigo_act'] == act_code]
+        act_info = df_act.iloc[0].to_dict() if act_code and not df_act.empty else {}
+        
+        # b) Unir Ubicación (usando id_ubicacion)
+        ubic_id = claves_data.get('id_ubicacion')
+        df_ubic = DF_UBICACIONES[DF_UBICACIONES['id_ubicacion'] == ubic_id]
+        ubic_info = df_ubic.iloc[0].to_dict() if ubic_id and not df_ubic.empty else {}
+        
+        # c) Unir Contacto (usando id_contacto)
+        cont_id = claves_data.get('id_contancto')
+        df_cont = DF_CONTACTO[DF_CONTACTO['id_contancto'] == cont_id]
+        cont_info = df_cont.iloc[0].to_dict() if cont_id and not df_cont.empty else {}
+        
+        # 4. Estructurar la respuesta
+        respuesta = {
+            "id": establec_data.get('id'),
+            "nombre_establecimiento": establec_data.get('nom_estab'),
+            "latitud": establec_data.get('latitud'),
+            "longitud": establec_data.get('longitud'),
+            
+            "actividad": {
+                "codigo": act_info.get('codigo_act'),
+                "nombre": act_info.get('nombre_act')
+            },
+            
+            "ubicacion_keys": {
+                "id_ubicacion": ubic_info.get('id_ubicacion'),
+                "entidad": ubic_info.get('entidad'),
+                "municipio": ubic_info.get('municipio'),
+                "localidad": ubic_info.get('localidad')
+            },
+            
+            "contacto": {
+                "id_contacto": cont_info.get('id_contancto'),
+                "telefono": cont_info.get('telefono'),
+                "correo": cont_info.get('correoelec'),
+                "web": cont_info.get('www')
+            }
         }
-    }
-    
-    return jsonify(respuesta), 200
+        
+        return jsonify(respuesta), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error en get_negocio_by_id (ID: {idNegocio}): {e}")
+        return jsonify({"error": "Error interno del servidor al buscar el detalle del negocio."}), 500
 
 
 @app.route("/api/excel/proveedor/filtrar", methods=["GET"])
@@ -169,50 +201,59 @@ def filtrar_proveedores():
     
     # 1. Obtener parámetros y validarlos
     try:
-        # idActa se convierte a float para asegurar la coincidencia con el tipo de dato en Pandas
         id_acta_float = float(request.args.get('idActa')) 
         lat_obj = float(request.args.get('lat'))
         long_obj = float(request.args.get('long'))
-        # Radio es opcional, 5 km por defecto
         radio_km = float(request.args.get('radio', 5)) 
     except (ValueError, TypeError):
-        # 400 Bad Request si faltan o son inválidos
         return jsonify({"error": "Parámetros idActa, lat y long son requeridos y deben ser números válidos."}), 400
     
-    df_filtrado_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL['codigo_acta'] == id_acta_float]
+    try:
+        # 2. Filtrar por ID de Acta (Rubro)
+        df_filtrado_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL['codigo_acta'] == id_acta_float]
 
-    if df_filtrado_claves.empty:
-        return jsonify({"mensaje": f"No se encontraron proveedores para la actividad {id_acta_float}."}), 204 # 204 No Content
+        if df_filtrado_claves.empty:
+            return jsonify({"mensaje": f"No se encontraron proveedores para la actividad {id_acta_float}."}), 204 # 204 No Content
 
-    # 3. Realizar el JOIN (Merge) para obtener las coordenadas y nombres
-    df_proveedores = pd.merge(
-        # Tabla de la que obtuvimos las claves filtradas
-        df_filtrado_claves,
-        # Tabla de la que necesitamos los datos geográficos y el nombre
-        DF_ESTABLECIMIENTOS[['id', 'nom_estab', 'latitud', 'longitud']], 
-        # Unir por id_establecimiento (en la tabla de claves) y id (en la tabla de establecimientos)
-        left_on='id_establecimiento', 
-        right_on='id',                
-        how='inner' # Solo incluir coincidencias
-    )
-    if df_proveedores.empty:
-        return jsonify({"mensaje": "Los proveedores filtrados no tienen información geográfica válida."}), 204
+        # 3. Realizar el JOIN (Merge) para obtener las coordenadas y nombres
+        df_proveedores = pd.merge(
+            df_filtrado_claves,
+            DF_ESTABLECIMIENTOS[['id', 'nom_estab', 'latitud', 'longitud']], 
+            left_on='id_establecimiento', 
+            right_on='id', 
+            how='inner'
+        )
+        if df_proveedores.empty:
+            return jsonify({"mensaje": "Los proveedores filtrados no tienen información geográfica válida."}), 204
+            
+        # 4. Limpieza post-Merge (Clave para evitar SyntaxError en el cliente)
+        # Forzar la conversión a numérico y eliminar NaNs residuales en las coordenadas
+        df_proveedores['latitud'] = pd.to_numeric(df_proveedores['latitud'], errors='coerce')
+        df_proveedores['longitud'] = pd.to_numeric(df_proveedores['longitud'], errors='coerce')
+        df_proveedores = df_proveedores.dropna(subset=['latitud', 'longitud'])
+
+        if df_proveedores.empty:
+            return jsonify({"mensaje": "Los proveedores filtrados no tienen coordenadas válidas después de la limpieza."}), 204
+
+        # 5. Calcular la distancia Haversine y añadirla como columna
+        df_proveedores['distancia_km'] = haversine_distance(
+            lat_obj, long_obj, 
+            df_proveedores['latitud'], df_proveedores['longitud']
+        )
+
+        # 6. Filtrar por el radio geográfico
+        df_proveedores_final = df_proveedores[df_proveedores['distancia_km'] <= radio_km]
+
+        if df_proveedores_final.empty:
+            return jsonify({"mensaje": f"No se encontraron proveedores dentro de {radio_km} km para la actividad {id_acta_float}."}), 204
+            
+        # 7. Preparar la respuesta JSON
+        respuesta = df_proveedores_final[['id', 'nom_estab', 'latitud', 'longitud', 'distancia_km']].to_dict(orient='records')
+        return jsonify(respuesta), 200
         
-    # 4. Calcular la distancia Haversine y añadirla como columna
-    df_proveedores['distancia_km'] = haversine_distance(
-        lat_obj, long_obj, 
-        df_proveedores['latitud'], df_proveedores['longitud']
-    )
-
-    # 5. Filtrar por el radio geográfico
-    df_proveedores_final = df_proveedores[df_proveedores['distancia_km'] <= radio_km]
-
-    if df_proveedores_final.empty:
-        return jsonify({"mensaje": f"No se encontraron proveedores dentro de {radio_km} km para la actividad {id_acta_float}."}), 204
-        
-    # 6. Preparar la respuesta JSON (solo con las columnas necesarias para el mapa)
-    respuesta = df_proveedores_final[['id', 'nom_estab', 'latitud', 'longitud', 'distancia_km']].to_dict(orient='records')
-    return jsonify(respuesta), 200 # 200 OK}
+    except Exception as e:
+        app.logger.error(f"Error en filtrar_proveedores: {e}")
+        return jsonify({"error": "Error interno del servidor al aplicar filtros geográficos."}), 500
 
 
 @app.route("/api/excel/ubicacion/simular", methods=["POST"])
@@ -220,21 +261,16 @@ def filtrar_proveedores():
 def simular_ubicacion():
     """
     Recibe coordenadas (lat, long) en el cuerpo JSON para simular el Negocio Objetivo 
-    y confirma la recepción de los datos.
+    y confirma la recepción de los datos. (Este endpoint no se usó en el MVP final)
     """
     data = request.get_json()
     
-    # 1. Validación de datos de entrada desde el cuerpo JSON
     try:
-        # Intentamos obtener y convertir las coordenadas a float
         lat = float(data['lat'])
         long = float(data['long'])
     except (TypeError, KeyError, ValueError):
-        # 400 Bad Request si faltan datos ('lat'/'long') o no son números válidos
         return jsonify({"error": "El cuerpo de la solicitud JSON debe contener 'lat' y 'long' válidos."}), 400
 
-    # 2. Confirmación
-    # Se retorna el estado 201 Created para indicar que se recibió y "creó" el recurso temporalmente.
     return jsonify({
         "mensaje": "Ubicación temporal del Negocio Objetivo creada exitosamente para búsquedas.",
         "latitud_objetivo": lat,
@@ -243,13 +279,14 @@ def simular_ubicacion():
 
 
 ####### Endpoints para Base de Datos SQLite ######
+# Nota: Estos endpoints están incluidos pero no se están utilizando en el frontend
+# actual (mapa.js) que se enfoca en la versión de Pandas (Excel).
+
 @app.route("/api/sqlite/negocios", methods=["GET"])
 @rate_limit
 def get_sqlite_negocios():
     """Consulta ID, Latitud y Longitud para la carga inicial del mapa."""
     conn = get_db_connection()
-    
-    # Solo las columnas esenciales para el mapa
     query = "SELECT id, latitud, longitud FROM establecimientos"
     negocios = conn.execute(query).fetchall()
     conn.close()
@@ -257,7 +294,6 @@ def get_sqlite_negocios():
     if not negocios:
         return jsonify({"mensaje": "No se encontraron negocios en SQLite"}), 204
 
-    # Convertir el resultado de SQLite a una lista de diccionarios
     data_json = [dict(row) for row in negocios]
     return jsonify(data_json), 200
 
@@ -268,7 +304,6 @@ def get_sqlite_negocio_detallado(idNegocio):
     """Consultar los datos detallados de un negocio específico mediante JOINs en SQL."""
     conn = get_db_connection()
 
-    # Usamos LEFT JOIN para que el negocio se muestre incluso si le faltan datos (contacto)
     query = f"""
     SELECT 
         e.id, e.nom_estab, e.latitud, e.longitud,
@@ -283,7 +318,7 @@ def get_sqlite_negocio_detallado(idNegocio):
     LEFT JOIN 
         acta a ON t.codigo_acta = a.codigo_act
     LEFT JOIN 
-        ubicaiones u ON t.id_ubicacion = u.id_ubicacion
+        ubicaciones u ON t.id_ubicacion = u.id_ubicacion
     LEFT JOIN 
         contacto c ON t.id_contacto = c.id_contancto
     WHERE 
@@ -296,7 +331,6 @@ def get_sqlite_negocio_detallado(idNegocio):
     if not negocio:
         return jsonify({"mensaje": f"Negocio con ID {idNegocio} no encontrado en SQLite"}), 404
         
-    # Estructurar la respuesta JSON (similar a la versión de Pandas)
     row = dict(negocio)
     respuesta = {
         "id": row['id'],
@@ -329,7 +363,7 @@ def filtrar_sqlite_proveedores():
     """Filtra proveedores por rubro (idActa) y proximidad geográfica."""
     
     try:
-        id_acta = request.args.get('idActa') # Se queda como string para la consulta SQL
+        id_acta = request.args.get('idActa') 
         lat_obj = float(request.args.get('lat'))
         long_obj = float(request.args.get('long'))
         radio_km = float(request.args.get('radio', 5)) 
@@ -338,8 +372,6 @@ def filtrar_sqlite_proveedores():
 
     conn = get_db_connection()
     
-    # 1. Consultar Proveedores por idActa usando SQL
-    # Se une la tabla principal con la de establecimientos para obtener coordenadas.
     query = f"""
     SELECT 
         e.id, e.nom_estab, e.latitud, e.longitud
@@ -356,21 +388,19 @@ def filtrar_sqlite_proveedores():
     if df_proveedores.empty:
         return jsonify({"mensaje": f"No se encontraron proveedores para la actividad {id_acta}."}), 204
 
-    # 2. Calcular la distancia Haversine (Pandas es ideal para esto)
     df_proveedores['distancia_km'] = haversine_distance(
         lat_obj, long_obj, 
         df_proveedores['latitud'], df_proveedores['longitud']
     )
 
-    # 3. Filtrar por radio geográfico
     df_proveedores_final = df_proveedores[df_proveedores['distancia_km'] <= radio_km]
 
     if df_proveedores_final.empty:
         return jsonify({"mensaje": f"No se encontraron proveedores dentro de {radio_km} km para la actividad {id_acta}."}), 204
         
-    # 4. Preparar la respuesta JSON
     respuesta = df_proveedores_final[['id', 'nom_estab', 'latitud', 'longitud', 'distancia_km']].to_dict(orient='records')
     return jsonify(respuesta), 200
 
 if __name__ == "__main__":
+    # Importante: usar debug=False en producción o desactivar las advertencias de Flask
     app.run(debug=True)

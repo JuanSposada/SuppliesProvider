@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Buscador de Proveedores - Mapa MVP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+    
+    <style>
+        /* CSS básico para asegurar que el mapa se muestre */
+        body { margin: 0; padding: 0; font-family: sans-serif; }
+        #mapa { 
+            height: 70vh; /* 70% del alto de la ventana */
+            width: 100%; 
+        }
+        .controls {
+            padding: 15px;
+            background: #f4f4f4;
+            border-bottom: 1px solid #ddd;
+        }
+        /* Estilos para iconos de Proveedor y Objetivo */
+        .objetivo-icon {
+            font-size: 24px;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            color: red;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid red;
+        }
+        .proveedor-icon {
+            font-size: 20px;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            color: gold;
+            text-shadow: 1px 1px 2px #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <h2>🔍 Búsqueda de Proveedores (MVP)</h2>
+        <p>Encuentra proveedores por rubro cerca de un negocio objetivo.</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 15px;">
+            <div>
+                <label for="idObjetivo">ID Negocio Objetivo:</label>
+                <input type="number" id="idObjetivo" value="6762603" placeholder="Ej: 6166273" style="width: 120px;">
+            </div>
+            <div>
+                <label for="rubroBusqueda">Rubro Proveedor (Cód. Acta):</label>
+                <input type="number" id="rubroBusqueda" value="931210" placeholder="Ej: 541111" style="width: 120px;">
+            </div>
+            <div>
+                <label for="radioBusqueda">Radio de Búsqueda (Km):</label>
+                <input type="number" id="radioBusqueda" value="10" min="1" max="50" style="width: 80px;">
+            </div>
+        </div>
+
+        <button onclick="seleccionarNegocioObjetivo()">1. Seleccionar Negocio Objetivo</button>
+        <button onclick="ejecutarBusquedaProveedor()" disabled id="btnBuscar">2. Buscar Proveedores Potenciales</button>
+        <button onclick="cargarTodosLosNegocios()">3. Mostrar Todos los Negocios</button>
+        
+        <hr>
+        
+        <div id="resultadosLista" style="max-height: 25vh; overflow-y: auto; margin-top: 10px; border: 1px solid #ccc; padding: 5px;">
+            <h4>Proveedores Potenciales (0 resultados)</h4>
+        </div>
+        
+    </div>
+
+    <div id="mapa"></div> 
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+    
+    <script src="../static/mapa.js"></script> 
+</body>
+</html>
