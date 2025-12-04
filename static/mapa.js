@@ -9,7 +9,7 @@ const API_BASE = (
     window.location.hostname.includes("pythonanywhere.com")
 )
 ? `https://${window.location.hostname}/api/excel`
-: 'http://127.0.0.1:5000/api/excel';
+: `${window.location.origin}/api/excel`;
 
 
 let mapa;

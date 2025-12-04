@@ -1,14 +1,15 @@
-from flask import Flask, jsonify, request, render_template
-import pandas as pd
-import numpy as np
+import os
 import sqlite3
 import time
 from functools import wraps
+from flask import Flask, jsonify, request, render_template
+import pandas as pd
+import numpy as np
 
 app = Flask(__name__)
 DATABASE = './supplier.db'
 
-import os
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,12 +69,9 @@ def rate_limit(f):
     def decorated_function(*args, **kwargs):
         # Obtener la dirección IP del usuario (maneja proxy/load balancer)
         ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
-        
-        current_time = time.time()
-        
+        current_time = time.time()        
         if ip_address not in USERS_REQUESTS:
             USERS_REQUESTS[ip_address] = []
-        
         # Limpiar el historial
         USERS_REQUESTS[ip_address] = [
             t for t in USERS_REQUESTS[ip_address] 
@@ -334,7 +332,7 @@ def get_sqlite_negocio_detallado(idNegocio):
     """Consultar los datos detallados de un negocio específico mediante JOINs en SQL."""
     conn = get_db_connection()
 
-    query = f"""
+    query = """
     SELECT 
         e.id, e.nom_estab, e.latitud, e.longitud,
         t.codigo_acta, t.id_ubicacion, t.id_contacto,
@@ -402,7 +400,7 @@ def filtrar_sqlite_proveedores():
 
     conn = get_db_connection()
     
-    query = f"""
+    query = """
     SELECT 
         e.id, e.nom_estab, e.latitud, e.longitud
     FROM 
