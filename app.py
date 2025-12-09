@@ -164,7 +164,7 @@ def hello_world():
 def get_negocios():
     """Endpoint para cargar todos los puntos del DENUE para el mapa inicial."""
     #raise Exception("Pandas falló por memoria o datos corruptos (simulación)")
-    return jsonify({"error": "Falla forzada de Excel"}), 500
+    #return jsonify({"error": "Falla forzada de Excel"}), 500
     try:
         # Creamos una copia para trabajar y evitar SettingWithCopyWarning
         df_mapa = DF_ESTABLECIMIENTOS[['id', 'latitud', 'longitud', 'nom_estab']].copy()
