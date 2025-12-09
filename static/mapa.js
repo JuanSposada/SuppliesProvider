@@ -5,11 +5,12 @@
 // ====================================================================
 
 // Detecta si estamos en PythonAnywhere o en localhost
+// *** CAMBIO CLAVE: API_BASE ahora solo almacena la raíz del dominio ***
 const API_BASE = (
-    window.location.hostname.includes("pythonanywhere.com")
+    window.location.hostname.includes("pythonanywhere.com")
 )
-? `https://${window.location.hostname}/api/excel`
-: `${window.location.origin}/api/excel`;
+? `https://${window.location.hostname}` // -> https://juansposada.pythonanywhere.com
+: `${window.location.origin}`;         // -> http://localhost
 
 
 let mapa;
@@ -23,19 +24,20 @@ let negocioObjetivo = null;
 
 // Inicializar el Mapa de Leaflet
 function inicializarMapa() {
-    // Coordenadas de ejemplo: Baja California (cerca de la zona de tus datos de prueba)
-    mapa = L.map('mapa').setView([32.5, -116.6], 9); 
+    // Coordenadas de ejemplo: Baja California (cerca de la zona de tus datos de prueba)
+    mapa = L.map('mapa').setView([32.5, -116.6], 9); 
 
-    // Agregar la capa base (Tiles de OpenStreetMap)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(mapa);
+    // Agregar la capa base (Tiles de OpenStreetMap)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(mapa);
 
-    // Agregar las capas al mapa
-    markerClusterGroup.addTo(mapa);
-    capaObjetivo.addTo(mapa); 
-    cargarRubrosDropdown();
+    // Agregar las capas al mapa
+    markerClusterGroup.addTo(mapa);
+    capaObjetivo.addTo(mapa); 
+    cargarRubrosDropdown();
+    cargarTodosLosNegocios();
 }
 
 // 4. Iniciar el mapa
@@ -45,369 +47,406 @@ inicializarMapa();
 // ====================================================================
 // FUNCIONES DE INTERACCIÓN CON LA API (ENDPOINTS /api/excel/...)
 // ====================================================================
-
-/**
- * Función que obtiene el detalle completo de un negocio por su ID y actualiza su popup.
- */
-function obtenerDetalle(idNegocio) {
-    fetch(`${API_BASE}/negocio/${idNegocio}`)
-        .then(response => {
-            if (!response.ok) {
-                return response.json()
-                    .then(err => { throw new Error(err.mensaje || JSON.stringify(err) || "Error al obtener detalle."); })
-                    .catch(() => { throw new Error(`Error HTTP ${response.status} (${response.statusText})`); });
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Estructura el HTML para el Popup (Ventana emergente)
-            const detalleHTML = `
-                <h4>${data.nombre_establecimiento} (ID: ${data.id})</h4>
-                <hr>
-                <b>Actividad:</b> ${data.actividad.nombre || 'N/A'}<br>
-                <b>Ubicación:</b> ${data.ubicacion_keys.municipio || 'N/A'} (${data.ubicacion_keys.entidad || 'N/A'})<br>
-                <b>Teléfono:</b> ${data.contacto.telefono || 'Sin datos'}<br>
-                <b>Correo:</b> ${data.contacto.correo || 'Sin datos'}<br>
-                <br>
-                <i>Haga clic para ver más detalles en la consola.</i>
-            `;
-            
-            // Busca el marcador y actualiza el popup (funciona con cluster)
-            markerClusterGroup.eachLayer(function(marcador) {
-                if (marcador.options.id === data.id) {
-                    marcador.setPopupContent(detalleHTML).openPopup();
-                }
-            });
-
-            console.log(`Detalle completo del Negocio ID ${data.id}:`, data);
-        })
-        .catch(error => {
-            console.error('Error al obtener el detalle:', error);
-            alert(`Error al cargar el detalle: ${error.message}`);
-        });
-}
-
-
-/**
- * Carga y dibuja todos los negocios del CSV en el mapa (usando clustering).
- */
-function cargarTodosLosNegocios() {
-    console.log("Cargando todos los negocios para el mapa...");
+function actualizarEstadoCarga(mensaje, ocultarSpinner = false) {
+    // 1. Obtener los nuevos elementos por ID
+    const overlayDiv = document.getElementById('loadingOverlay');
+    const messageDiv = document.getElementById('loadingMessage');
     
-    // Limpiar: Ambos grupos
-    markerClusterGroup.clearLayers(); 
-    capaObjetivo.clearLayers();
-    document.getElementById('btnBuscar').disabled = true; 
-    document.getElementById('resultadosLista').innerHTML = '<h4>Proveedores Potenciales (0 resultados)</h4>';
+    // Si no existen los elementos, salimos
+    if (!overlayDiv || !messageDiv) return;
 
-    fetch(`${API_BASE}/negocios`)
-        .then(response => {
-             if (!response.ok) {
-                if (response.status === 204) {
-                    return { negocios: [] };
-                }
-                return response.json()
-                    .then(err => { throw new Error(err.mensaje || JSON.stringify(err) || `Error HTTP ${response.status}`); })
-                    .catch(() => { throw new Error(`Error HTTP: ${response.status} (${response.statusText}) - Verifique el log de Flask/NaN.`); });
-            }
-            return response.json();
-        })
-        .then(negocios => {
-            if (negocios.length === 0) {
-                alert("La API no devolvió negocios válidos.");
-                return;
-            }
+    // 2. Actualizar el mensaje de texto
+    messageDiv.textContent = mensaje;
 
-            let bounds = [];
-            negocios.forEach(n => {
-                if (n.latitud && n.longitud) {
-                    const lat = parseFloat(n.latitud);
-                    const long = parseFloat(n.longitud);
-
-                    const marcador = L.marker([lat, long], { id: n.id }) 
-                        .bindPopup(`<b>ID: ${n.id}</b><br>Haga clic para ver detalle. D-Clic para Objetivo.`);
-
-                    // Agregar al grupo de clústeres
-                    markerClusterGroup.addLayer(marcador); 
-
-                    // Listener 1: Clic simple para cargar detalles (mantener)
-                    marcador.on('click', () => {
-                        obtenerDetalle(n.id);
-                    });
-                    
-                    // Listener 2: DOBLE CLIC para establecer como Objetivo (¡Nuevo!)
-                    marcador.on('dblclick', () => {
-                        // 1. Actualizar el input
-                        document.getElementById('idObjetivo').value = n.id;
-                        // 2. Ejecutar la función de selección de objetivo
-                        seleccionarNegocioObjetivo();
-                    });
-
-                    bounds.push([lat, long]);
-                }
-            });
-            
-            // Ajustar el mapa al clúster si hay datos
-            if (bounds.length > 0) {
-                 mapa.fitBounds(markerClusterGroup.getBounds());
-            }
-
-            console.log(`Carga exitosa: ${negocios.length} negocios dibujados (en clústeres).`);
-            alert(`Se cargaron ${negocios.length} negocios en el mapa.`);
-        })
-        .catch(error => {
-            console.error('Error al cargar todos los negocios:', error);
-            alert(`Error de red o API: ${error.message}`);
-        });
+    // 3. Mostrar u ocultar el overlay completo
+    if (ocultarSpinner) {
+        // Ocultar la capa (el overlay completo)
+        overlayDiv.classList.add('hidden-spinner');
+    } else {
+        // Mostrar la capa
+        overlayDiv.classList.remove('hidden-spinner');
+    }
 }
 
+/**
+ * Función que obtiene el detalle completo de un negocio por su ID y actualiza su popup.
+ */
+function obtenerDetalle(idNegocio) {
+    // *** CAMBIO: Añadimos /api/excel/ a la ruta del endpoint ***
+    fetch(`${API_BASE}/api/excel/negocio/${idNegocio}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.json()
+                    .then(err => { throw new Error(err.mensaje || JSON.stringify(err) || "Error al obtener detalle."); })
+                    .catch(() => { throw new Error(`Error HTTP ${response.status} (${response.statusText})`); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Estructura el HTML para el Popup (Ventana emergente)
+            const detalleHTML = `
+                <h4>${data.nombre_establecimiento} (ID: ${data.id})</h4>
+                <hr>
+                <b>Actividad:</b> ${data.actividad.nombre || 'N/A'}<br>
+                <b>Ubicación:</b> ${data.ubicacion_keys.municipio || 'N/A'} (${data.ubicacion_keys.entidad || 'N/A'})<br>
+                <b>Teléfono:</b> ${data.contacto.telefono || 'Sin datos'}<br>
+                <b>Correo:</b> ${data.contacto.correo || 'Sin datos'}<br>
+                <br>
+                <i>Haga clic para ver más detalles en la consola.</i>
+            `;
+            
+            // Busca el marcador y actualiza el popup (funciona con cluster)
+            markerClusterGroup.eachLayer(function(marcador) {
+                if (marcador.options.id === data.id) {
+                    marcador.setPopupContent(detalleHTML).openPopup();
+                }
+            });
+
+            console.log(`Detalle completo del Negocio ID ${data.id}:`, data);
+        })
+        .catch(error => {
+            console.error('Error al obtener el detalle:', error);
+            alert(`Error al cargar el detalle: ${error.message}`);
+        });
+}
+
+
+/**
+ * Carga y dibuja todos los negocios del CSV en el mapa (usando clustering).
+ */
+function cargarTodosLosNegocios() {
+    console.log("Cargando todos los negocios para el mapa...");
+    
+    // 📌 PASO 1: MOSTRAR el spinner y el mensaje de carga
+    actualizarEstadoCarga('Cargando negocios...', false);
+
+    // Limpiar: Ambos grupos
+    markerClusterGroup.clearLayers(); 
+    capaObjetivo.clearLayers();
+    document.getElementById('btnBuscar').disabled = true; 
+    document.getElementById('resultadosLista').innerHTML = '<h4>Proveedores Potenciales (0 resultados)</h4>';
+
+    // *** CAMBIO: Añadimos /api/excel/ a la ruta del endpoint ***
+    fetch(`${API_BASE}/api/excel/negocios`)
+        .then(response => {
+             if (!response.ok) {
+                if (response.status === 204) {
+                    return { negocios: [] };
+                }
+                return response.json()
+                    .then(err => { throw new Error(err.mensaje || JSON.stringify(err) || `Error HTTP ${response.status}`); })
+                    .catch(() => { throw new Error(`Error HTTP: ${response.status} (${response.statusText}) - Verifique el log de Flask/NaN.`); });
+            }
+            return response.json();
+        })
+        .then(negocios => {
+            if (negocios.length === 0) {
+                alert("La API no devolvió negocios válidos.");
+                // 📌 PASO 2: OCULTAR spinner en caso de no haber datos.
+                actualizarEstadoCarga('Carga finalizada. No se encontraron negocios.', true);
+                return;
+            }
+
+            let bounds = [];
+            // ... (bucle y dibujo de marcadores sin cambios) ...
+            negocios.forEach(n => {
+                if (n.latitud && n.longitud) {
+                    const lat = parseFloat(n.latitud);
+                    const long = parseFloat(n.longitud);
+
+                    const marcador = L.marker([lat, long], { id: n.id }) 
+                        .bindPopup(`<b>ID: ${n.id}</b><br>Haga clic para ver detalle. D-Clic para Objetivo.`);
+
+                    // Agregar al grupo de clústeres
+                    markerClusterGroup.addLayer(marcador); 
+
+                    // Listener 1: Clic simple para cargar detalles (mantener)
+                    marcador.on('click', () => {
+                        obtenerDetalle(n.id);
+                    });
+                    
+                    // Listener 2: DOBLE CLIC para establecer como Objetivo (¡Nuevo!)
+                    marcador.on('dblclick', () => {
+                        // 1. Actualizar el input
+                        document.getElementById('idObjetivo').value = n.id;
+                        // 2. Ejecutar la función de selección de objetivo
+                        seleccionarNegocioObjetivo();
+                    });
+
+                    bounds.push([lat, long]);
+                }
+            });
+            
+            // Ajustar el mapa al clúster si hay datos
+            if (bounds.length > 0) {
+                 mapa.fitBounds(markerClusterGroup.getBounds());
+            }
+
+            console.log(`Carga exitosa: ${negocios.length} negocios dibujados (en clústeres).`);
+            alert(`Se cargaron ${negocios.length} negocios en el mapa.`);
+            
+            // 📌 PASO 2: OCULTAR spinner en caso de éxito
+            actualizarEstadoCarga(`Carga exitosa: ${negocios.length} negocios dibujados.`, true);
+
+        })
+        .catch(error => {
+            console.error('Error al cargar todos los negocios:', error);
+            alert(`Error de red o API: ${error.message}`);
+            
+            // 📌 PASO 3: OCULTAR spinner en caso de error
+            actualizarEstadoCarga(`Error al cargar: ${error.message}`, true);
+        });
+}
 // ====================================================================
 // FUNCIONES DE FLUJO DEL MVP (Negocio Objetivo y Filtrado)
 // ====================================================================
 
 /**
- * Paso 1: Obtiene los detalles de un negocio por ID, lo centra y lo guarda como objetivo.
- */
+ * Paso 1: Obtiene los detalles de un negocio por ID, lo centra y lo guarda como objetivo.
+ */
 function seleccionarNegocioObjetivo() {
-    const idObjetivo = document.getElementById('idObjetivo').value;
-    if (!idObjetivo) {
-        alert("Por favor, ingresa un ID para el Negocio Objetivo.");
-        return;
-    }
+    const idObjetivo = document.getElementById('idObjetivo').value;
+    if (!idObjetivo) {
+        alert("Por favor, ingresa un ID para el Negocio Objetivo.");
+        return;
+    }
 
-    // 1. Limpiar el mapa y el estado
-    markerClusterGroup.clearLayers(); // Limpiamos todos los demás puntos
-    capaObjetivo.clearLayers();
-    document.getElementById('btnBuscar').disabled = true;
-    document.getElementById('resultadosLista').innerHTML = '<h4>Proveedores Potenciales (0 resultados)</h4>';
+    // 1. Limpiar el mapa y el estado
+    markerClusterGroup.clearLayers(); // Limpiamos todos los demás puntos
+    capaObjetivo.clearLayers();
+    document.getElementById('btnBuscar').disabled = true;
+    document.getElementById('resultadosLista').innerHTML = '<h4>Proveedores Potenciales (0 resultados)</h4>';
 
-    fetch(`${API_BASE}/negocio/${idObjetivo}`)
-        .then(response => {
-            if (!response.ok) {
-                return response.json()
-                    .then(err => { throw new Error(err.mensaje || "Error al obtener detalle."); });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!data.latitud || !data.longitud) {
-                throw new Error("El negocio objetivo no tiene coordenadas válidas.");
-            }
+    // *** CAMBIO: Añadimos /api/excel/ a la ruta del endpoint ***
+    fetch(`${API_BASE}/api/excel/negocio/${idObjetivo}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.json()
+                    .then(err => { throw new Error(err.mensaje || "Error al obtener detalle."); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.latitud || !data.longitud) {
+                throw new Error("El negocio objetivo no tiene coordenadas válidas.");
+            }
 
-            // 2. Guardar el objetivo globalmente
-            negocioObjetivo = {
-                id: data.id,
-                lat: parseFloat(data.latitud),
-                long: parseFloat(data.longitud),
-                nombre: data.nombre_establecimiento
-            };
+            // 2. Guardar el objetivo globalmente
+            negocioObjetivo = {
+                id: data.id,
+                lat: parseFloat(data.latitud),
+                long: parseFloat(data.longitud),
+                nombre: data.nombre_establecimiento
+            };
 
-            // 3. Resaltar el punto en el mapa con un icono especial
-            const objetivoIcono = L.divIcon({
-                className: 'objetivo-icon', 
-                html: '🎯', 
-                iconSize: [30, 30]
-            });
+            // 3. Resaltar el punto en el mapa con un icono especial
+            const objetivoIcono = L.divIcon({
+                className: 'objetivo-icon', 
+                html: '🎯', 
+                iconSize: [30, 30]
+            });
 
-            L.marker([negocioObjetivo.lat, negocioObjetivo.long], { icon: objetivoIcono })
-                .bindPopup(`<b>Negocio Objetivo:</b><br>${negocioObjetivo.nombre}<br>ID: ${negocioObjetivo.id}`)
-                .addTo(capaObjetivo)
-                .openPopup();
-            
-            mapa.setView([negocioObjetivo.lat, negocioObjetivo.long], 13);
-            
-            // 4. Habilitar la búsqueda de proveedores
-            document.getElementById('btnBuscar').disabled = false;
-            console.log(`Negocio Objetivo: ${negocioObjetivo.nombre} (Lat: ${negocioObjetivo.lat}, Long: ${negocioObjetivo.long})`);
-            alert(`Negocio Objetivo seleccionado: ${negocioObjetivo.nombre}. ¡Listo para buscar proveedores!`);
-        })
-        .catch(error => {
-            negocioObjetivo = null;
-            console.error('Error al seleccionar el Negocio Objetivo:', error);
-            alert(`Error: ${error.message}`);
-        });
+            L.marker([negocioObjetivo.lat, negocioObjetivo.long], { icon: objetivoIcono })
+                .bindPopup(`<b>Negocio Objetivo:</b><br>${negocioObjetivo.nombre}<br>ID: ${negocioObjetivo.id}`)
+                .addTo(capaObjetivo)
+                .openPopup();
+            
+            mapa.setView([negocioObjetivo.lat, negocioObjetivo.long], 13);
+            
+            // 4. Habilitar la búsqueda de proveedores
+            document.getElementById('btnBuscar').disabled = false;
+            console.log(`Negocio Objetivo: ${negocioObjetivo.nombre} (Lat: ${negocioObjetivo.lat}, Long: ${negocioObjetivo.long})`);
+            alert(`Negocio Objetivo seleccionado: ${negocioObjetivo.nombre}. ¡Listo para buscar proveedores!`);
+        })
+        .catch(error => {
+            negocioObjetivo = null;
+            console.error('Error al seleccionar el Negocio Objetivo:', error);
+            alert(`Error: ${error.message}`);
+        });
 }
 
 /**
- * Paso 2: Ejecuta la búsqueda de proveedores filtrados por rubro y radio.
- */
+ * Paso 2: Ejecuta la búsqueda de proveedores filtrados por rubro y radio.
+ */
 function ejecutarBusquedaProveedor() {
-    if (!negocioObjetivo) {
-        alert("Primero debes seleccionar un Negocio Objetivo.");
-        return;
-    }
+    if (!negocioObjetivo) {
+        alert("Primero debes seleccionar un Negocio Objetivo.");
+        return;
+    }
 
-    const idActa = document.getElementById('rubroBusqueda').value;
-    const radioKm = document.getElementById('radioBusqueda').value;
+    const idActa = document.getElementById('rubroBusqueda').value;
+    const radioKm = document.getElementById('radioBusqueda').value;
 
-    if (!idActa) {
-        alert("Por favor, ingresa el Código de Rubro (Acta) para buscar.");
-        return;
-    }
+    if (!idActa) {
+        alert("Por favor, ingresa el Código de Rubro (Acta) para buscar.");
+        return;
+    }
 
-    // 1. Limpiar resultados anteriores y dibujar el círculo de búsqueda
-    markerClusterGroup.clearLayers();
-    capaObjetivo.clearLayers(); 
-    
-    // Dibujar el punto objetivo y el círculo de radio
-    const radioMeters = parseFloat(radioKm) * 1000;
-    
-    // Círculo de radio
-    L.circle([negocioObjetivo.lat, negocioObjetivo.long], {
-        color: 'blue',
-        fillColor: '#007bff',
-        fillOpacity: 0.1,
-        radius: radioMeters
-    }).addTo(capaObjetivo).bindPopup(`Radio de Búsqueda: ${radioKm} km`).openPopup();
-    
-    // Marcador objetivo (redibujado)
-    L.marker([negocioObjetivo.lat, negocioObjetivo.long], { 
-        icon: L.divIcon({className: 'objetivo-icon', html: '🎯', iconSize: [30, 30]})
-    }).addTo(capaObjetivo);
+    // 1. Limpiar resultados anteriores y dibujar el círculo de búsqueda
+    markerClusterGroup.clearLayers();
+    capaObjetivo.clearLayers(); 
+    
+    // Dibujar el punto objetivo y el círculo de radio
+    const radioMeters = parseFloat(radioKm) * 1000;
+    
+    // Círculo de radio
+    L.circle([negocioObjetivo.lat, negocioObjetivo.long], {
+        color: 'blue',
+        fillColor: '#007bff',
+        fillOpacity: 0.1,
+        radius: radioMeters
+    }).addTo(capaObjetivo).bindPopup(`Radio de Búsqueda: ${radioKm} km`).openPopup();
+    
+    // Marcador objetivo (redibujado)
+    L.marker([negocioObjetivo.lat, negocioObjetivo.long], { 
+        icon: L.divIcon({className: 'objetivo-icon', html: '🎯', iconSize: [30, 30]})
+    }).addTo(capaObjetivo);
 
 
-    // 2. Llamar al endpoint de filtrado
-    const url = `${API_BASE}/proveedor/filtrar?idActa=${idActa}&lat=${negocioObjetivo.lat}&long=${negocioObjetivo.long}&radio=${radioKm}`;
-    console.log(`Ejecutando búsqueda: ${url}`);
-    
-    fetch(url)
-        .then(async (response) => { // Usamos async para manejar errores de forma más limpia
-            if (response.status === 204) {
-                return { proveedores: [] }; // Maneja 204 No Content correctamente
-            }
+    // 2. Llamar al endpoint de filtrado
+    // *** CAMBIO: Añadimos /api/excel/ a la ruta del endpoint ***
+    const url = `${API_BASE}/api/excel/proveedor/filtrar?idActa=${idActa}&lat=${negocioObjetivo.lat}&long=${negocioObjetivo.long}&radio=${radioKm}`;
+    console.log(`Ejecutando búsqueda: ${url}`);
+    
+    fetch(url)
+        .then(async (response) => { // Usamos async para manejar errores de forma más limpia
+            if (response.status === 204) {
+                return { proveedores: [] }; // Maneja 204 No Content correctamente
+            }
 
-            const contentType = response.headers.get("content-type");
-            
-            if (!response.ok) {
-                // Para errores 4xx/5xx, intentamos leer el cuerpo para obtener el error JSON
-                if (contentType && contentType.includes("application/json")) {
-                    const err = await response.json();
-                    throw new Error(err.mensaje || `Error HTTP ${response.status}: ${JSON.stringify(err)}`);
-                } else {
-                    // Si no es JSON o no tiene cuerpo (es HTML de error), lanzamos un error genérico
-                    throw new Error(`Error HTTP: ${response.status} (${response.statusText || 'Error de servidor sin JSON válido'})`);
-                }
-            }
-            
-            // Si la respuesta es OK (200), leemos el JSON
-            if (contentType && contentType.includes("application/json")) {
-                return response.json();
-            } else {
-                 console.warn("Respuesta 200 OK pero sin contenido JSON esperado. Tratando como 0 resultados.");
-                 return { proveedores: [] };
-            }
-        })
-        .then(data => {
-            // Unificamos el manejo de datos (si viene como lista directa o dentro de un objeto)
-            const proveedores = data.proveedores || data;
-            
-            // 3. Procesar resultados y actualizar la UI
-            if (proveedores.length === 0) {
-                alert(`No se encontraron Proveedores Potenciales.`);
-                actualizarListaResultados([]);
-                return;
-            }
+            const contentType = response.headers.get("content-type");
+            
+            if (!response.ok) {
+                // Para errores 4xx/5xx, intentamos leer el cuerpo para obtener el error JSON
+                if (contentType && contentType.includes("application/json")) {
+                    const err = await response.json();
+                    throw new Error(err.mensaje || `Error HTTP ${response.status}: ${JSON.stringify(err)}`);
+                } else {
+                    // Si no es JSON o no tiene cuerpo (es HTML de error), lanzamos un error genérico
+                    throw new Error(`Error HTTP: ${response.status} (${response.statusText || 'Error de servidor sin JSON válido'})`);
+                }
+            }
+            
+            // Si la respuesta es OK (200), leemos el JSON
+            if (contentType && contentType.includes("application/json")) {
+                return response.json();
+            } else {
+                 console.warn("Respuesta 200 OK pero sin contenido JSON esperado. Tratando como 0 resultados.");
+                 return { proveedores: [] };
+            }
+        })
+        .then(data => {
+            // Unificamos el manejo de datos (si viene como lista directa o dentro de un objeto)
+            const proveedores = data.proveedores || data;
+            
+            // 3. Procesar resultados y actualizar la UI
+            if (proveedores.length === 0) {
+                alert(`No se encontraron Proveedores Potenciales.`);
+                actualizarListaResultados([]);
+                return;
+            }
 
-            proveedores.forEach(p => {
-                // Dibujar el proveedor con un ícono diferente (estrella)
-                const proveedorIcono = L.divIcon({
-                    className: 'proveedor-icon', 
-                    html: '⭐', 
-                    iconSize: [25, 25]
-                });
+            proveedores.forEach(p => {
+                // Dibujar el proveedor con un ícono diferente (estrella)
+                const proveedorIcono = L.divIcon({
+                    className: 'proveedor-icon', 
+                    html: '⭐', 
+                    iconSize: [25, 25]
+                });
 
-                const marcador = L.marker([p.latitud, p.longitud], { 
-                    id: p.id,
-                    icon: proveedorIcono
-                })
-                    .bindPopup(`<b>${p.nom_estab}</b><br>Distancia: ${p.distancia_km.toFixed(2)} km<br>Clic para detalle.`)
-                    .addTo(markerClusterGroup); 
+                const marcador = L.marker([p.latitud, p.longitud], { 
+                    id: p.id,
+                    icon: proveedorIcono
+                })
+                    .bindPopup(`<b>${p.nom_estab}</b><br>Distancia: ${p.distancia_km.toFixed(2)} km<br>Clic para detalle.`)
+                    .addTo(markerClusterGroup); 
 
-                marcador.on('click', () => {
-                    obtenerDetalle(p.id); 
-                });
-            });
+                marcador.on('click', () => {
+                    obtenerDetalle(p.id); 
+                });
+            });
 
-            // 4. Ajustar el mapa para incluir ambos grupos de puntos
-            try {
-                mapa.fitBounds(markerClusterGroup.getBounds().extend(capaObjetivo.getBounds()));
-            } catch (e) {
-                console.warn("No se pudo ajustar a los límites, probablemente no hay suficientes marcadores.", e);
-                mapa.setView([negocioObjetivo.lat, negocioObjetivo.long], 11);
-            }
+            // 4. Ajustar el mapa para incluir ambos grupos de puntos
+            try {
+                mapa.fitBounds(markerClusterGroup.getBounds().extend(capaObjetivo.getBounds()));
+            } catch (e) {
+                console.warn("No se pudo ajustar a los límites, probablemente no hay suficientes marcadores.", e);
+                mapa.setView([negocioObjetivo.lat, negocioObjetivo.long], 11);
+            }
 
-            actualizarListaResultados(proveedores);
-            alert(`Búsqueda exitosa: ${proveedores.length} Proveedores Potenciales encontrados.`);
-        })
-        .catch(error => {
-            console.error('Error al ejecutar el filtro de proveedores:', error);
-            actualizarListaResultados([]);
-            alert(`Error al buscar proveedores: ${error.message}`);
-        });
+            actualizarListaResultados(proveedores);
+            alert(`Búsqueda exitosa: ${proveedores.length} Proveedores Potenciales encontrados.`);
+        })
+        .catch(error => {
+            console.error('Error al ejecutar el filtro de proveedores:', error);
+            actualizarListaResultados([]);
+            alert(`Error al buscar proveedores: ${error.message}`);
+        });
 }
 /**
- * Función auxiliar para renderizar la lista de resultados en el panel de control.
- */
+ * Función auxiliar para renderizar la lista de resultados en el panel de control.
+ */
 function actualizarListaResultados(proveedores) {
-    const listaDiv = document.getElementById('resultadosLista');
-    let html = `<h4>Proveedores Potenciales (${proveedores.length} resultados)</h4>`;
+    const listaDiv = document.getElementById('resultadosLista');
+    let html = `<h4>Proveedores Potenciales (${proveedores.length} resultados)</h4>`;
 
-    if (proveedores.length > 0) {
-        html += '<ol style="padding-left: 20px; margin-top: 5px;">';
-        // Ordenar por distancia (menor a mayor)
-        proveedores.sort((a, b) => a.distancia_km - b.distancia_km); 
-        
-        proveedores.forEach(p => {
-            // Se usa el evento 'setView' de Leaflet para centrar el mapa en el punto
-            html += `
-                <li style="margin-bottom: 5px;">
-                    <b>${p.nom_estab || `ID: ${p.id}`}</b>
-                    <br>Distancia: <b>${p.distancia_km.toFixed(2)} km</b>
-                    (<a href="#" onclick="mapa.setView([${p.latitud}, ${p.longitud}], 15); return false;">Ver en mapa</a>)
-                </li>
-            `;
-        });
-        html += '</ol>';
-    } else if (negocioObjetivo) {
-         html += '<p>No se encontraron proveedores dentro del radio especificado.</p>';
-    }
+    if (proveedores.length > 0) {
+        html += '<ol style="padding-left: 20px; margin-top: 5px;">';
+        // Ordenar por distancia (menor a mayor)
+        proveedores.sort((a, b) => a.distancia_km - b.distancia_km); 
+        
+        proveedores.forEach(p => {
+            // Se usa el evento 'setView' de Leaflet para centrar el mapa en el punto
+            html += `
+                <li style="margin-bottom: 5px;">
+                    <b>${p.nom_estab || `ID: ${p.id}`}</b>
+                    <br>Distancia: <b>${p.distancia_km.toFixed(2)} km</b>
+                    (<a href="#" onclick="mapa.setView([${p.latitud}, ${p.longitud}], 15); return false;">Ver en mapa</a>)
+                </li>
+            `;
+        });
+        html += '</ol>';
+    } else if (negocioObjetivo) {
+         html += '<p>No se encontraron proveedores dentro del radio especificado.</p>';
+    }
 
-    listaDiv.innerHTML = html;
+    listaDiv.innerHTML = html;
 }
 
 function cargarRubrosDropdown() {
-    fetch(`${API_BASE}/rubros`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('No se pudo cargar la lista de rubros.');
-            }
-            return response.json();
-        })
-        .then(rubros => {
-            const select = document.getElementById('rubroBusqueda');
-            // Limpiar la opción de "Cargando..."
-            select.innerHTML = ''; 
-            
-            // Añadir una opción por defecto
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = '--- Selecciona un Rubro ---';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            select.appendChild(defaultOption);
+    // *** CAMBIO: Añadimos /api/excel/ a la ruta del endpoint ***
+    fetch(`${API_BASE}/api/excel/rubros`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('No se pudo cargar la lista de rubros.');
+            }
+            return response.json();
+        })
+        .then(rubros => {
+            const select = document.getElementById('rubroBusqueda');
+            // Limpiar la opción de "Cargando..."
+            select.innerHTML = ''; 
+            
+            // Añadir una opción por defecto
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '--- Selecciona un Rubro ---';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
 
-            // Llenar el dropdown con los datos
-            rubros.forEach(rubro => {
-                const option = document.createElement('option');
-                option.value = rubro.codigo_act; // El valor que se envía a la API es el código
-                option.textContent = `[${rubro.codigo_act}] ${rubro.nombre_act}`; // El texto que ve el usuario
-                select.appendChild(option);
-            });
-            console.log(`Dropdown de rubros cargado con ${rubros.length} opciones.`);
-        })
-        .catch(error => {
-            console.error('Error al cargar el dropdown de rubros:', error);
-            const select = document.getElementById('rubroBusqueda');
-            select.innerHTML = `<option value="" disabled selected>${error.message}</option>`;
-        });
+            // Llenar el dropdown con los datos
+            rubros.forEach(rubro => {
+                const option = document.createElement('option');
+                option.value = rubro.codigo_act; // El valor que se envía a la API es el código
+                option.textContent = `[${rubro.codigo_act}] ${rubro.nombre_act}`; // El texto que ve el usuario
+                select.appendChild(option);
+            });
+            console.log(`Dropdown de rubros cargado con ${rubros.length} opciones.`);
+        })
+        .catch(error => {
+            console.error('Error al cargar el dropdown de rubros:', error);
+            const select = document.getElementById('rubroBusqueda');
+            select.innerHTML = `<option value="" disabled selected>${error.message}</option>`;
+        });
 }

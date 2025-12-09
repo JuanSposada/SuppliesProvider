@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Buscador de Proveedores - Mapa MVP</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/styles.css">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
@@ -47,6 +48,7 @@
 
     <div class="controls">
         <h2>🔍 Búsqueda de Proveedores (MVP)</h2>
+        <div id="estadoCarga" class="hidden-spinner"></div>
         <p>Encuentra proveedores por rubro cerca de un negocio objetivo.</p>
         
         <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 15px;">
@@ -79,6 +81,12 @@
     </div>
 
     <div id="mapa"></div> 
+    <div id="loadingOverlay" class="hidden-spinner">
+    <div id="loadingContent">
+        <div id="loadingSpinner"></div> 
+        <div id="loadingMessage"></div> 
+    </div>
+</div>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     

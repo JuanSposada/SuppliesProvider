@@ -1,0 +1,61 @@
+/* =======================================================
+   CSS PARA EL SPINNER CENTRADO Y OVERLAY (SUPERPOSICIÓN)
+   ======================================================= */
+
+/* 1. La capa de superposición (overlay) que cubre toda la pantalla */
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7); /* Fondo semitransparente */
+    z-index: 10000; 
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* 2. Clase para ocultar (oculta la capa completa) */
+.hidden-spinner {
+    opacity: 0;
+    visibility: hidden; 
+}
+
+/* 3. Contenedor central (donde va el spinner y el mensaje) */
+#loadingContent {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #333; /* Fondo oscuro para el spinner */
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 4. Estilo para el Spinner (el elemento giratorio) */
+#loadingSpinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff; /* Color primario del spinner */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+/* 5. Estilo para el mensaje de carga */
+#loadingMessage {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* 6. Definición de la animación de rotación */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

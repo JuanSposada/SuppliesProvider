@@ -60,6 +60,67 @@ USERS_REQUESTS = {}
 RATE_LIMIT_WINDOW = 60  # segundos (1 minuto)
 RATE_LIMIT_MAX_REQUESTS = 100 # 10 solicitudes por minuto
 
+# falback hacia SQlite 
+
+# app.py (Añadir después de def rate_limit(f):)
+
+# ====================================================================
+# DECORADOR DE FALLBACK (TOLERANCIA A FALLOS)
+# ====================================================================
+
+def fallback_to_sqlite(sqlite_view_func_name):
+    """
+    Decorador que intenta ejecutar la función de vista 'excel' (Pandas).
+    Si falla con un error 500 (Error interno, ej. Pandas/memoria),
+    intenta ejecutar la función de vista 'sqlite' especificada.
+    
+    :param sqlite_view_func_name: Nombre de la función de vista de SQLite
+                                  a la que se debe recurrir.
+    """
+    def decorator(excel_view_func):
+        @wraps(excel_view_func)
+        def wrapper(*args, **kwargs):
+            app.logger.info(f"Intentando la ruta principal (Excel): {excel_view_func.__name__}")
+            try:
+                # 1. Intentar ejecutar la función de vista de Excel (Pandas)
+                response, status_code = excel_view_func(*args, **kwargs)
+                
+                # Si la respuesta es exitosa o es "No Content" (200 o 204), se devuelve.
+                if status_code < 500:
+                    return response, status_code
+
+                # Si el código es 500, continuamos al fallback
+                app.logger.warning(f"La ruta Excel {excel_view_func.__name__} retornó un error 5xx, iniciando fallback a SQLite.")
+                
+            except Exception as e:
+                # 2. Si hay una excepción de Python (ej. KeyError, fallo de Pandas, OOM)
+                app.logger.error(f"Fallo grave en la ruta Excel {excel_view_func.__name__}: {e}")
+                app.logger.info(f"Iniciando fallback a la ruta SQLite: {sqlite_view_func_name}")
+                
+            # 3. Fallback a la función de SQLite
+            try:
+                # Obtener la función de vista de SQLite por su nombre
+                sqlite_view_func = app.view_functions.get(sqlite_view_func_name)
+                if sqlite_view_func is None:
+                    raise RuntimeError(f"Función de fallback '{sqlite_view_func_name}' no encontrada.")
+                
+                # Ejecutar la función de vista de SQLite con los mismos argumentos
+                response, status_code = sqlite_view_func(*args, **kwargs)
+                app.logger.info(f"Fallback a SQLite exitoso. Estado: {status_code}")
+                return response, status_code
+                
+            except Exception as e:
+                # 4. Si la función de SQLite también falla
+                app.logger.error(f"Fallo en la ruta de fallback SQLite {sqlite_view_func_name}: {e}")
+                return jsonify({"error": "Error crítico: Fallaron ambas fuentes de datos (Excel y SQLite).",
+                                "detalles": str(e)}), 500
+
+        return wrapper
+    return decorator
+
+
+
+# Limitacion de peticiones por ip
 def rate_limit(f):
     """
     Decorador para limitar el número de solicitudes por dirección IP.
@@ -69,15 +130,12 @@ def rate_limit(f):
     def decorated_function(*args, **kwargs):
         # Obtener la dirección IP del usuario (maneja proxy/load balancer)
         ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
-        current_time = time.time()        
+        current_time = time.time()
         if ip_address not in USERS_REQUESTS:
             USERS_REQUESTS[ip_address] = []
         # Limpiar el historial
-        USERS_REQUESTS[ip_address] = [
-            t for t in USERS_REQUESTS[ip_address] 
-            if t > current_time - RATE_LIMIT_WINDOW
-        ]
-        
+        USERS_REQUESTS[ip_address] = [t for t in USERS_REQUESTS[ip_address]
+            if t > current_time - RATE_LIMIT_WINDOW]
         # Verificar si el límite ha sido excedido
         if len(USERS_REQUESTS[ip_address]) >= RATE_LIMIT_MAX_REQUESTS:
             # Respuesta 429 Too Many Requests
@@ -85,10 +143,8 @@ def rate_limit(f):
                 "error": "Límite de solicitudes excedido.", 
                 "detalles": f"Solo se permiten {RATE_LIMIT_MAX_REQUESTS} solicitudes por minuto."
             }), 429
-            
         # Si no se excede, registrar la solicitud actual
         USERS_REQUESTS[ip_address].append(current_time)
-        
         # Continuar con la función original del endpoint
         return f(*args, **kwargs)
     return decorated_function
@@ -103,18 +159,19 @@ def hello_world():
 
 
 @app.route("/api/excel/negocios", methods=['GET'])
+@fallback_to_sqlite('get_sqlite_negocios')
 @rate_limit
 def get_negocios():
     """Endpoint para cargar todos los puntos del DENUE para el mapa inicial."""
+    #raise Exception("Pandas falló por memoria o datos corruptos (simulación)")
+    return jsonify({"error": "Falla forzada de Excel"}), 500
     try:
         # Creamos una copia para trabajar y evitar SettingWithCopyWarning
         df_mapa = DF_ESTABLECIMIENTOS[['id', 'latitud', 'longitud', 'nom_estab']].copy()
-        
         # 1. Limpieza de NaN y Conversión de Tipo
         df_mapa['id'] = pd.to_numeric(df_mapa['id'], errors='coerce')
         df_mapa['latitud'] = pd.to_numeric(df_mapa['latitud'], errors='coerce')
         df_mapa['longitud'] = pd.to_numeric(df_mapa['longitud'], errors='coerce')
-        
         # 2. Eliminamos cualquier fila donde ID, latitud o longitud sea NaN
         df_mapa = df_mapa.dropna(subset=['id', 'latitud', 'longitud'])
 
@@ -123,49 +180,41 @@ def get_negocios():
 
         # 3. Serialización
         data_json = df_mapa.to_dict(orient='records')
-        
         return jsonify(data_json), 200
-        
     except Exception as e:
         app.logger.error(f"Error en get_negocios: {e}")
-        return jsonify({"error": "Error interno del servidor al procesar los datos de establecimientos."}), 500
+        return jsonify({"error": "Error interno del servidor "
+        "al procesar los datos de establecimientos."}), 500
 
-
-@app.route("/api/excel/negocio/<int:idNegocio>", methods=["GET"])
+@app.route("/api/excel/negocio/<int:id_negocio>", methods=["GET"])
+@fallback_to_sqlite('get_sqlite_negocio_detallado')
 @rate_limit
-def get_negocio_by_id(idNegocio):
+def get_negocio_by_id(id_negocio):
     """Consulta la información detallada de un solo negocio por su ID."""
     try:
         # 1. Obtener claves de la tabla principal
-        df_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL["id_establecimiento"] == idNegocio]
+        df_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL["id_establecimiento"] == id_negocio]
         if df_claves.empty:
-            return jsonify({"mensaje": f"Negocio con ID {idNegocio} no encontrado en la tabla principal."}), 404
+            return jsonify({"mensaje": f"Negocio con ID {id_negocio} no encontrado en la tabla principal."}), 404
         claves_data = df_claves.iloc[0].to_dict()
-        
         # 2. Obtener la información básica (Lat/Long y Nombre) de la tabla de establecimientos
-        df_establec = DF_ESTABLECIMIENTOS[DF_ESTABLECIMIENTOS["id"] == idNegocio]
+        df_establec = DF_ESTABLECIMIENTOS[DF_ESTABLECIMIENTOS["id"] == id_negocio]
         if df_establec.empty:
-            return jsonify({"mensaje": f"No se encontró información geográfica/nombre para el ID {idNegocio}."}), 404
-          
+            return jsonify({"mensaje": f"No se encontró información geográfica/nombre para el ID {id_negocio}."}), 404
         establec_data = df_establec.iloc[0].to_dict()
-        
         # 3. Realizar LOOKUPS (Busquedas) en tablas auxiliares
-        
         # a) Unir Actividad (usando codigo_acta)
         act_code = claves_data.get('codigo_acta')
         df_act = DF_ACTA[DF_ACTA['codigo_act'] == act_code]
         act_info = df_act.iloc[0].to_dict() if act_code and not df_act.empty else {}
-        
         # b) Unir Ubicación (usando id_ubicacion)
         ubic_id = claves_data.get('id_ubicacion')
         df_ubic = DF_UBICACIONES[DF_UBICACIONES['id_ubicacion'] == ubic_id]
         ubic_info = df_ubic.iloc[0].to_dict() if ubic_id and not df_ubic.empty else {}
-        
         # c) Unir Contacto (usando id_contacto)
         cont_id = claves_data.get('id_contancto')
         df_cont = DF_CONTACTO[DF_CONTACTO['id_contancto'] == cont_id]
         cont_info = df_cont.iloc[0].to_dict() if cont_id and not df_cont.empty else {}
-        
         # 4. Estructurar la respuesta
         respuesta = {
             "id": establec_data.get('id'),
@@ -177,14 +226,12 @@ def get_negocio_by_id(idNegocio):
                 "codigo": act_info.get('codigo_act'),
                 "nombre": act_info.get('nombre_act')
             },
-            
             "ubicacion_keys": {
                 "id_ubicacion": ubic_info.get('id_ubicacion'),
                 "entidad": ubic_info.get('entidad'),
                 "municipio": ubic_info.get('municipio'),
                 "localidad": ubic_info.get('localidad')
-            },
-            
+            },            
             "contacto": {
                 "id_contacto": cont_info.get('id_contancto'),
                 "telefono": cont_info.get('telefono'),
@@ -196,41 +243,44 @@ def get_negocio_by_id(idNegocio):
         return jsonify(respuesta), 200
         
     except Exception as e:
-        app.logger.error(f"Error en get_negocio_by_id (ID: {idNegocio}): {e}")
+        app.logger.error(f"Error en get_negocio_by_id (ID: {id_negocio}): {e}")
         return jsonify({"error": "Error interno del servidor al buscar el detalle del negocio."}), 500
 
 
 @app.route("/api/excel/proveedor/filtrar", methods=["GET"])
+@fallback_to_sqlite('filtrar_sqlite_proveedores')
 @rate_limit
 def filtrar_proveedores():
     """Filtra proveedores por rubro (idActa) y proximidad geográfica."""
     
     # 1. Obtener parámetros y validarlos
     try:
-        id_acta_float = float(request.args.get('idActa')) 
+        id_acta_float = float(request.args.get('idActa'))
         lat_obj = float(request.args.get('lat'))
         long_obj = float(request.args.get('long'))
-        radio_km = float(request.args.get('radio', 5)) 
+        radio_km = float(request.args.get('radio', 5))
     except (ValueError, TypeError):
-        return jsonify({"error": "Parámetros idActa, lat y long son requeridos y deben ser números válidos."}), 400
-    
+        return jsonify({"error": "Parámetros idActa, lat y long "
+        "son requeridos y deben ser números válidos."}), 400
     try:
         # 2. Filtrar por ID de Acta (Rubro)
         df_filtrado_claves = DF_TABLA_PRINCIPAL[DF_TABLA_PRINCIPAL['codigo_acta'] == id_acta_float]
 
         if df_filtrado_claves.empty:
-            return jsonify({"mensaje": f"No se encontraron proveedores para la actividad {id_acta_float}."}), 204 # 204 No Content
+            return jsonify({"mensaje":
+                            f"No se encontraron proveedores para la actividad {id_acta_float}."}), 204 # 204 No Content
 
         # 3. Realizar el JOIN (Merge) para obtener las coordenadas y nombres
         df_proveedores = pd.merge(
             df_filtrado_claves,
-            DF_ESTABLECIMIENTOS[['id', 'nom_estab', 'latitud', 'longitud']], 
-            left_on='id_establecimiento', 
-            right_on='id', 
+            DF_ESTABLECIMIENTOS[['id', 'nom_estab', 'latitud', 'longitud']],
+            left_on='id_establecimiento',
+            right_on='id',
             how='inner'
         )
         if df_proveedores.empty:
-            return jsonify({"mensaje": "Los proveedores filtrados no tienen información geográfica válida."}), 204
+            return jsonify({"mensaje": "Los proveedores filtrados "
+            "no tienen información geográfica válida."}), 204
             
         # 4. Limpieza post-Merge (Clave para evitar SyntaxError en el cliente)
         # Forzar la conversión a numérico y eliminar NaNs residuales en las coordenadas
@@ -239,11 +289,12 @@ def filtrar_proveedores():
         df_proveedores = df_proveedores.dropna(subset=['latitud', 'longitud'])
 
         if df_proveedores.empty:
-            return jsonify({"mensaje": "Los proveedores filtrados no tienen coordenadas válidas después de la limpieza."}), 204
+            return jsonify({"mensaje": "Los proveedores filtrados no tienen "
+            "coordenadas válidas después de la limpieza."}), 204
 
         # 5. Calcular la distancia Haversine y añadirla como columna
         df_proveedores['distancia_km'] = haversine_distance(
-            lat_obj, long_obj, 
+            lat_obj, long_obj,
             df_proveedores['latitud'], df_proveedores['longitud']
         )
 
@@ -251,15 +302,18 @@ def filtrar_proveedores():
         df_proveedores_final = df_proveedores[df_proveedores['distancia_km'] <= radio_km]
 
         if df_proveedores_final.empty:
-            return jsonify({"mensaje": f"No se encontraron proveedores dentro de {radio_km} km para la actividad {id_acta_float}."}), 204
+            return jsonify({"mensaje": f"No se encontraron proveedores" 
+                            f" dentro de {radio_km} km para la actividad {id_acta_float}."}), 204
             
         # 7. Preparar la respuesta JSON
-        respuesta = df_proveedores_final[['id', 'nom_estab', 'latitud', 'longitud', 'distancia_km']].to_dict(orient='records')
+        respuesta = df_proveedores_final[['id', 'nom_estab', 'latitud', 
+                                          'longitud', 'distancia_km']].to_dict(orient='records')
         return jsonify(respuesta), 200
         
     except Exception as e:
-        app.logger.error(f"Error en filtrar_proveedores: {e}")
-        return jsonify({"error": "Error interno del servidor al aplicar filtros geográficos."}), 500
+        app.logger.error(f"Error en filtrar_proveedores: %s",e)
+        return jsonify({"error": "Error interno del servidor "
+        "al aplicar filtros geográficos."}), 500
 
 
 @app.route("/api/excel/ubicacion/simular", methods=["POST"])
@@ -275,7 +329,8 @@ def simular_ubicacion():
         lat = float(data['lat'])
         long = float(data['long'])
     except (TypeError, KeyError, ValueError):
-        return jsonify({"error": "El cuerpo de la solicitud JSON debe contener 'lat' y 'long' válidos."}), 400
+        return jsonify({"error": "El cuerpo de la solicitud "
+        "JSON debe contener 'lat' y 'long' válidos."}), 400
 
     return jsonify({
         "mensaje": "Ubicación temporal del Negocio Objetivo creada exitosamente para búsquedas.",
@@ -286,24 +341,22 @@ def simular_ubicacion():
 # En app.py
 
 @app.route("/api/excel/rubros", methods=["GET"])
+@fallback_to_sqlite('rubros_sqlite')
 @rate_limit
 def get_rubros():
     """Devuelve la lista de todos los códigos de acta y sus nombres."""
     try:
         # Seleccionar solo las columnas necesarias para el dropdown
         df_rubros = DF_ACTA[['codigo_act', 'nombre_act']].copy()
-        
         # Opcional: limpiar NaNs si los hubiera y asegurar formato
         df_rubros = df_rubros.dropna().drop_duplicates()
-        
         # Convertir a una lista de diccionarios
         data_json = df_rubros.to_dict(orient='records')
-        
         return jsonify(data_json), 200
-        
     except Exception as e:
-        app.logger.error(f"Error en get_rubros: {e}")
-        return jsonify({"error": "Error interno del servidor al obtener la lista de rubros."}), 500
+        app.logger.error("Error en get_rubros: %s",e)
+        return jsonify({"error": "Error interno del servidor al obtener "
+        "la lista de rubros."}), 500
     
 
 ####### Endpoints para Base de Datos SQLite ######
@@ -325,10 +378,9 @@ def get_sqlite_negocios():
     data_json = [dict(row) for row in negocios]
     return jsonify(data_json), 200
 
-
-@app.route("/api/sqlite/negocio/<int:idNegocio>", methods=["GET"])
+@app.route("/api/sqlite/negocio/<int:id_negocio>", methods=["GET"])
 @rate_limit
-def get_sqlite_negocio_detallado(idNegocio):
+def get_sqlite_negocio_detallado(id_negocio):
     """Consultar los datos detallados de un negocio específico mediante JOINs en SQL."""
     conn = get_db_connection()
 
@@ -353,11 +405,11 @@ def get_sqlite_negocio_detallado(idNegocio):
         e.id = ?
     """
     
-    negocio = conn.execute(query, (idNegocio,)).fetchone()
+    negocio = conn.execute(query, (id_negocio,)).fetchone()
     conn.close()
 
     if not negocio:
-        return jsonify({"mensaje": f"Negocio con ID {idNegocio} no encontrado en SQLite"}), 404
+        return jsonify({"mensaje": f"Negocio con ID {id_negocio} no encontrado en SQLite"}), 404
         
     row = dict(negocio)
     respuesta = {
@@ -396,7 +448,8 @@ def filtrar_sqlite_proveedores():
         long_obj = float(request.args.get('long'))
         radio_km = float(request.args.get('radio', 5)) 
     except (ValueError, TypeError):
-        return jsonify({"error": "Parámetros idActa, lat y long son requeridos y deben ser números válidos."}), 400
+        return jsonify({"error": "Parámetros idActa, lat y long son requeridos"
+        " y deben ser números válidos."}), 400
 
     conn = get_db_connection()
     
@@ -422,12 +475,30 @@ def filtrar_sqlite_proveedores():
     )
 
     df_proveedores_final = df_proveedores[df_proveedores['distancia_km'] <= radio_km]
-
     if df_proveedores_final.empty:
-        return jsonify({"mensaje": f"No se encontraron proveedores dentro de {radio_km} km para la actividad {id_acta}."}), 204
-        
+        return jsonify({"mensaje": f"No se encontraron proveedores dentro de {radio_km} km para la actividad {id_acta}."}), 204        
     respuesta = df_proveedores_final[['id', 'nom_estab', 'latitud', 'longitud', 'distancia_km']].to_dict(orient='records')
     return jsonify(respuesta), 200
+
+# app.py (Añadir en la sección de Endpoints para SQLite)
+
+@app.route("/api/sqlite/rubros", methods=["GET"])
+@rate_limit
+def rubros_sqlite():
+    """Devuelve la lista de códigos de acta y sus nombres desde SQLite."""
+    conn = get_db_connection()
+    
+    # La tabla 'acta' contiene los códigos y nombres de rubros
+    query = "SELECT codigo_act, nombre_act FROM acta ORDER BY nombre_act"
+    rubros = conn.execute(query).fetchall()
+    conn.close()
+
+    if not rubros:
+        return jsonify({"mensaje": "No se encontraron rubros en SQLite"}), 204
+
+    # Convertir las filas de SQLite a formato JSON (lista de diccionarios)
+    data_json = [dict(row) for row in rubros]
+    return jsonify(data_json), 200
 
 if __name__ == "__main__":
     # Importante: usar debug=False en producción o desactivar las advertencias de Flask
