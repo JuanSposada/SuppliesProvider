@@ -18,6 +18,13 @@ Ultima actualización: 2025-12-10
     - Backend
 - Consideraciones
 - Métricas
+- Instalación y Despliegue con Docker
+- Arquitectura de Servicio con Proxy y Fallback
+- Arquitectura de Servicio con Proxy y Fallback
+- Estructura del Proyecto
+- Capturas de Pantalla
+- Arquitectura del Backend
+- Contribuciones
 
 
 ## Objetivo
@@ -170,8 +177,58 @@ git clone https://github.com/JuanSposada/SuppliesProvider.git
 ```bash
 cd SuppliesProvider
 ```
+### **2\. Crear y Activar el Entorno Virtual (venv)**
 
-### **2\. Configuración del Reverse Proxy (Nginx)**
+Es esencial para aislar las dependencias del proyecto.
+
+Bash
+
+\# Crear el entorno virtual
+
+```bash
+python -m venv venv 
+```
+
+
+\# Activar el entorno (Linux/macOS)
+
+```bash
+source venv/bin/activate 
+```
+
+\# Activar el entorno (Windows)
+
+```bash
+.\venv\Scripts\activate 
+```
+
+
+### **3\. Instalar Dependencias**
+
+Instala todas las librerías necesarias (Flask, Pandas, NumPy, etc.).
+
+```bash
+pip install -r requirements.txt 
+```
+
+
+### **4\. Configuración de Datos (Pre-requisito)**
+
+Asegúrate de que la carpeta bk\_excel\_db/ contenga todos los archivos CSV y que la base de datos supplier.db (SQLite) exista para el mecanismo de *fallback*. Puedes usar el script sqlite\_db/csv\_to\_sqlite.py para generar la base de datos si es necesario.
+
+### **5\. Ejecutar la Aplicación Flask**
+
+Bash
+```bash
+export FLASK_APP=app.py
+
+export FLASK_ENV=development 
+
+python app.py
+```
+
+La aplicación estará disponible en http://127.0.0.1:5000.
+### **6\. Configuración del Reverse Proxy (Nginx)**
 
 El archivo `nginx.conf` ya debe estar configurado dentro de la carpeta `docker_proxy/` para manejar dos *backends*:
 
@@ -180,7 +237,7 @@ El archivo `nginx.conf` ya debe estar configurado dentro de la carpeta `docker_p
 
 **Nota:** Revisa el archivo `docker_proxy/nginx.conf` y asegúrate de que la variable `proxy_pass` para el *fallback* apunte a tu URL específica de PythonAnywhere.
 
-### **3\. Construir y Levantar los Contenedores**
+### **7\. Construir y Levantar los Contenedores**
 
 Utiliza Docker Compose para construir la imagen de tu aplicación Flask y levantar el servicio de Proxy simultáneamente.
 ```bash
@@ -188,7 +245,7 @@ docker compose up -d
 ```
 * `-d`: Ejecuta los contenedores en modo *detached* (en segundo plano).
 
-### **4\. Acceder a la Aplicación**
+### **8\. Acceder a la Aplicación**
 
 La aplicación estará accesible a través del puerto configurado en el `docker-compose.yaml` (generalmente el puerto `80` o `8080` mapeado).
 ```
@@ -278,6 +335,41 @@ La API está diseñada para priorizar la velocidad usando datos en memoria, pero
 | **@fallback\_to\_sqlite** | Garantiza la continuidad del servicio (Resiliencia). | Decorador Python |
 | **Carga de Datos** | Lógica de manejo de datos de alto rendimiento. | Pandas (en memoria) |
 | **Persistencia** | Fuente de datos de reserva y tolerante a fallos. | SQLite |
+
+---
+
+## **📚 Referencia de la API (Endpoints)**
+
+La API implementa un modelo de **tolerancia a fallos** donde los *endpoints* principales (/api/excel/...) utilizan datos en memoria (Pandas/CSV) para un rendimiento rápido. Si estos fallan, el decorador @fallback\_to\_sqlite redirige automáticamente la solicitud al *endpoint* equivalente de SQLite.
+
+Todos los *endpoints* están protegidos por el decorador **@rate\_limit** que limita el uso por dirección IP.
+
+### **1\. Endpoints de Interfaz y Datos Generales**
+
+| Ruta | Método | Descripción | Fuente Principal | Fallback |
+| :---- | :---- | :---- | :---- | :---- |
+| / | GET | **Página principal.** Carga la interfaz web principal (index.html) con el mapa. | N/A | N/A |
+| /api/excel/rubros | GET | **Lista de Rubros/Actividades.** Devuelve una lista de todos los códigos de actividad (codigo\_act) y sus nombres (nombre\_act) para el menú desplegable de filtrado. | Pandas (DF\_ACTA) | /api/sqlite/rubros |
+| /api/excel/negocios | GET | **Carga inicial del mapa.** Devuelve ID, latitud, longitud y nombre de todos los establecimientos para dibujar los puntos en el mapa al inicio. | Pandas (DF\_ESTABLECIMIENTOS) | /api/sqlite/negocios |
+
+### **2\. Endpoints de Búsqueda y Filtrado (Core)**
+
+| Ruta | Método | Descripción | Fuente Principal | Fallback |
+| :---- | :---- | :---- | :---- | :---- |
+| /api/excel/negocio/\<id\> | GET | **Detalle de Negocio.** Devuelve la información completa de un solo establecimiento por su ID, realizando *lookups* en todas las tablas normalizadas (Actividad, Ubicación, Contacto). | Pandas (Multi-Join) | /api/sqlite/negocio/\<id\> |
+| /api/excel/proveedor/filtrar | GET | **Filtro de Proveedores.** El *endpoint* principal de lógica: filtra la base de datos por el **rubro** (idActa) y calcula la **distancia Haversine** para incluir solo los resultados dentro del radio\_km especificado. | Pandas (Join y Haversine) | /api/sqlite/proveedor/filtrar |
+| /api/excel/ubicacion/simular | POST | **Simulación de Ubicación.** (Utilidad) Recibe coordenadas (lat, long) en el cuerpo JSON para simular el "Negocio Objetivo". | N/A | N/A |
+
+### **3\. Endpoints de Fallback (SQLite)**
+
+Estas rutas son el objetivo del decorador @fallback\_to\_sqlite y solo se acceden automáticamente cuando la versión de Pandas falla. También pueden ser usadas directamente si se necesita acceder solo a la fuente de SQLite.
+
+| Ruta | Método | Descripción |
+| :---- | :---- | :---- |
+| /api/sqlite/rubros | GET | Versión de *fallback* para obtener la lista de rubros desde la base de datos SQLite. |
+| /api/sqlite/negocios | GET | Versión de *fallback* para cargar todos los puntos del mapa desde SQLite. |
+| /api/sqlite/negocio/\<id\> | GET | Versión de *fallback* para obtener el detalle de un negocio específico mediante JOIN en SQLite. |
+| /api/sqlite/proveedor/filtrar | GET | Versión de *fallback* para el filtrado geográfico, usando SQL para la selección inicial y Pandas para el cálculo de Haversine. |
 
 ---
 
